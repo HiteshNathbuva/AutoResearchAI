@@ -19,7 +19,7 @@ class ResearchAgent(BaseAgent):
             role="Research Specialist"
         )
 
-    def execute(self, input_data):
+    def execute(self, state):
         """
         Execute a research request.
 
@@ -30,7 +30,7 @@ class ResearchAgent(BaseAgent):
             str: LLM response.
         """
 
-        if not self.validate(input_data):
+        if not self.validate(state):
             raise ValueError("Input data cannot be empty.")
 
         system_prompt = load_prompt("researcher.md")
@@ -42,8 +42,18 @@ class ResearchAgent(BaseAgent):
             },
             {
                 "role": "user",
-                "content": input_data
+                "content": f"""
+            User Query:
+
+            {state.query}
+
+            Research Plan:
+
+            {state.plan}
+            """
             }
         ]
 
-        return self.llm.chat(messages)
+        state.research = self.llm.chat(messages)
+
+        return state

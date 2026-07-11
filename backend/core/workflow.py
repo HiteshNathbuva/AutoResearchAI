@@ -6,16 +6,8 @@ It coordinates the interaction between different agents and ensures
 proper task sequencing and state management.
 
 Current Pipeline:
-User Query
-    ↓
-Research Agent
-    ↓
-Response
 
-Future Pipeline:
 User Query
-    ↓
-Supervisor
     ↓
 Planner
     ↓
@@ -23,20 +15,19 @@ Research
     ↓
 Verification
     ↓
-Writer
-    ↓
-Final Report
+Future: Writer
 """
 
+from backend.agents.planner_agent import PlannerAgent
 from backend.agents.research_agent import ResearchAgent
+from backend.agents.verifier_agent import VerifierAgent
+
+from backend.core.state import WorkflowState
 
 
 class WorkflowOrchestrator:
     """
     Orchestrates the execution of multi-agent research workflows.
-
-    This class manages the lifecycle of a research task and will
-    coordinate multiple specialized agents as the project grows.
     """
 
     def __init__(self):
@@ -44,16 +35,16 @@ class WorkflowOrchestrator:
         Initialize workflow components.
         """
 
+        self.planner_agent = PlannerAgent()
         self.research_agent = ResearchAgent()
+        self.verifier_agent = VerifierAgent()
 
     def supervisor(self):
         """
-        Supervisor agent for overall workflow coordination.
+        Supervisor Agent
 
         TODO:
-        - Coordinate all agents
-        - Manage workflow state
-        - Handle failures
+        Implement in future.
         """
 
         raise NotImplementedError(
@@ -62,49 +53,36 @@ class WorkflowOrchestrator:
 
     def planner(self):
         """
-        Planner agent for task decomposition.
+        Planner Agent
 
         TODO:
-        - Analyze research query
-        - Generate research plan
+        Reserved for future implementation.
         """
 
         raise NotImplementedError(
             "Planner Agent has not been implemented yet."
         )
 
-    def research(self, query):
+    def research(self, state):
         """
-        Execute the research phase.
-
-        Args:
-            query: Research query.
-
-        Returns:
-            Research response.
+        Execute research stage.
         """
 
-        return self.research_agent.execute(query)
+        return self.research_agent.execute(state)
 
-    def verification(self):
+    def verification(self, state):
         """
-        Verification agent.
-
-        TODO:
-        - Validate research
-        - Fact checking
+        Execute verification stage.
         """
 
-        raise NotImplementedError(
-            "Verification Agent has not been implemented yet."
-        )
+        return self.verifier_agent.execute(state)
 
     def writer(self):
         """
-        Writer agent.
+        Writer Agent
 
         TODO:
-        - Generate final report
+        Implement in future.
         """
 
         raise NotImplementedError(
@@ -114,15 +92,23 @@ class WorkflowOrchestrator:
     def execute_pipeline(self, query):
         """
         Execute the complete workflow.
-
-        Args:
-            query: User research query.
-
-        Returns:
-            Final workflow output.
         """
 
-        if not query:
+        if not query.strip():
             raise ValueError("Query cannot be empty.")
 
-        return self.research(query)
+        state = WorkflowState(query=query)
+
+        # Planner
+        state.plan = self.planner_agent.execute(query)
+        state.mark_task_complete("Planner")
+
+        # Research
+        state = self.research(state)
+        state.mark_task_complete("Research")
+
+        # Verification
+        state = self.verification(state)
+        state.mark_task_complete("Verification")
+
+        return state
