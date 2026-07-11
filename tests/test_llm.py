@@ -2,7 +2,7 @@
 Simple test for verifying OpenRouter connection.
 
 Run:
-    python tests/test_llm.py
+    python -m tests.test_llm
 """
 
 from backend.core.llm import LLMClient

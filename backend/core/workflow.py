@@ -15,12 +15,31 @@ Research
     ↓
 Verification
     ↓
-Future: Writer
+Writer
+    ↓
+Final Report
+
+Future Pipeline:
+
+User Query
+    ↓
+Supervisor
+    ↓
+Planner
+    ↓
+Research
+    ↓
+Verification
+    ↓
+Writer
+    ↓
+Final Report
 """
 
 from backend.agents.planner_agent import PlannerAgent
 from backend.agents.research_agent import ResearchAgent
 from backend.agents.verifier_agent import VerifierAgent
+from backend.agents.writer_agent import WriterAgent
 
 from backend.core.state import WorkflowState
 
@@ -38,6 +57,7 @@ class WorkflowOrchestrator:
         self.planner_agent = PlannerAgent()
         self.research_agent = ResearchAgent()
         self.verifier_agent = VerifierAgent()
+        self.writer_agent = WriterAgent()
 
     def supervisor(self):
         """
@@ -77,21 +97,22 @@ class WorkflowOrchestrator:
 
         return self.verifier_agent.execute(state)
 
-    def writer(self):
+    def writer(self, state):
         """
-        Writer Agent
-
-        TODO:
-        Implement in future.
+        Execute writer stage.
         """
 
-        raise NotImplementedError(
-            "Writer Agent has not been implemented yet."
-        )
+        return self.writer_agent.execute(state)
 
     def execute_pipeline(self, query):
         """
         Execute the complete workflow.
+
+        Args:
+            query: User research query.
+
+        Returns:
+            WorkflowState containing the complete workflow output.
         """
 
         if not query.strip():
@@ -99,16 +120,19 @@ class WorkflowOrchestrator:
 
         state = WorkflowState(query=query)
 
-        # Planner
+        # Planner Stage
         state.plan = self.planner_agent.execute(query)
         state.mark_task_complete("Planner")
 
-        # Research
+        # Research Stage
         state = self.research(state)
         state.mark_task_complete("Research")
 
-        # Verification
+        # Verification Stage
         state = self.verification(state)
         state.mark_task_complete("Verification")
+
+        # Writer Stage
+        state = self.writer(state)
 
         return state
