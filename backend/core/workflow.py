@@ -5,120 +5,124 @@ This module manages the execution of multi-agent research workflows.
 It coordinates the interaction between different agents and ensures
 proper task sequencing and state management.
 
-TODO:
-- Implement Supervisor agent for workflow coordination
-- Implement Planner agent for task decomposition
-- Implement Research agent for information gathering
-- Implement Verification agent for fact-checking
-- Implement Writer agent for report generation
-- Implement workflow execution pipeline
+Current Pipeline:
+User Query
+    ↓
+Research Agent
+    ↓
+Response
+
+Future Pipeline:
+User Query
+    ↓
+Supervisor
+    ↓
+Planner
+    ↓
+Research
+    ↓
+Verification
+    ↓
+Writer
+    ↓
+Final Report
 """
+
+from backend.agents.research_agent import ResearchAgent
 
 
 class WorkflowOrchestrator:
     """
     Orchestrates the execution of multi-agent research workflows.
-    
-    This class manages the lifecycle of a research task, coordinating
-    between specialized agents to produce comprehensive research reports.
-    
-    TODO:
-    - Initialize workflow with configuration
-    - Load agent instances
-    - Set up state management
-    - Configure execution pipeline
+
+    This class manages the lifecycle of a research task and will
+    coordinate multiple specialized agents as the project grows.
     """
-    
+
+    def __init__(self):
+        """
+        Initialize workflow components.
+        """
+
+        self.research_agent = ResearchAgent()
+
     def supervisor(self):
         """
         Supervisor agent for overall workflow coordination.
-        
-        The supervisor manages the research process, delegates tasks to
-        specialized agents, and ensures quality standards are met.
-        
+
         TODO:
-        - Implement task delegation logic
-        - Monitor agent performance
-        - Handle error recovery
-        - Ensure workflow progress
+        - Coordinate all agents
+        - Manage workflow state
+        - Handle failures
         """
-        pass
-    
+
+        raise NotImplementedError(
+            "Supervisor Agent has not been implemented yet."
+        )
+
     def planner(self):
         """
-        Planner agent for task decomposition and strategy.
-        
-        The planner breaks down complex research queries into manageable
-        sub-tasks and creates a structured research plan.
-        
+        Planner agent for task decomposition.
+
         TODO:
-        - Implement query analysis
-        - Create research sub-tasks
-        - Prioritize research areas
-        - Generate execution timeline
+        - Analyze research query
+        - Generate research plan
         """
-        pass
-    
-    def research(self):
+
+        raise NotImplementedError(
+            "Planner Agent has not been implemented yet."
+        )
+
+    def research(self, query):
         """
-        Research agent for information gathering.
-        
-        The researcher conducts searches, retrieves information from
-        various sources, and compiles relevant data.
-        
-        TODO:
-        - Implement search integration
-        - Retrieve and filter information
-        - Extract relevant content
-        - Compile research notes
+        Execute the research phase.
+
+        Args:
+            query: Research query.
+
+        Returns:
+            Research response.
         """
-        pass
-    
+
+        return self.research_agent.execute(query)
+
     def verification(self):
         """
-        Verification agent for fact-checking and validation.
-        
-        The verifier cross-references information, checks credibility,
-        and ensures accuracy of research findings.
-        
+        Verification agent.
+
         TODO:
-        - Implement fact-checking logic
-        - Cross-reference sources
-        - Validate claims and data
-        - Flag inconsistencies
+        - Validate research
+        - Fact checking
         """
-        pass
-    
+
+        raise NotImplementedError(
+            "Verification Agent has not been implemented yet."
+        )
+
     def writer(self):
         """
-        Writer agent for report generation.
-        
-        The writer synthesizes research findings into coherent,
-        well-structured reports with proper formatting.
-        
+        Writer agent.
+
         TODO:
-        - Implement content synthesis
-        - Structure report sections
-        - Ensure readability
-        - Format output appropriately
+        - Generate final report
         """
-        pass
-    
+
+        raise NotImplementedError(
+            "Writer Agent has not been implemented yet."
+        )
+
     def execute_pipeline(self, query):
         """
-        Execute the complete workflow pipeline.
-        
+        Execute the complete workflow.
+
         Args:
-            query: The research query to process.
-            
+            query: User research query.
+
         Returns:
-            The final research report.
-            
-        TODO:
-        - Implement pipeline orchestration
-        - Coordinate agent execution
-        - Manage state transitions
-        - Handle pipeline errors
-        - Return final output
+            Final workflow output.
         """
-        pass
+
+        if not query:
+            raise ValueError("Query cannot be empty.")
+
+        return self.research(query)
