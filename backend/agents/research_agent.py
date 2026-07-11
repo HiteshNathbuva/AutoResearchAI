@@ -5,6 +5,7 @@ Responsible for answering research queries using the configured LLM.
 """
 
 from backend.core.agent import BaseAgent
+from backend.utils.prompt_loader import load_prompt
 
 
 class ResearchAgent(BaseAgent):
@@ -32,13 +33,12 @@ class ResearchAgent(BaseAgent):
         if not self.validate(input_data):
             raise ValueError("Input data cannot be empty.")
 
+        system_prompt = load_prompt("researcher.md")
+
         messages = [
             {
                 "role": "system",
-                "content": (
-                    "You are an expert AI research assistant. "
-                    "Provide accurate, clear and well-structured answers."
-                )
+                "content": system_prompt,
             },
             {
                 "role": "user",
