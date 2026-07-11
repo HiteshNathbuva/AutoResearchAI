@@ -5,68 +5,82 @@ This module provides the foundational agent structure for all AI agents in the s
 It defines the base class and interface that specialized agents must implement.
 
 TODO:
-- Implement BaseAgent class with common agent functionality
-- Implement execute() method for agent task execution
-- Implement validate() method for input/output validation
-- Implement cleanup() method for resource cleanup
+- Add lifecycle hooks
+- Add callback support
+- Add execution metrics
+- Add memory integration
 """
 
+from abc import ABC, abstractmethod
 
-class BaseAgent:
+from backend.core.llm import LLMClient
+
+
+class BaseAgent(ABC):
     """
-    Base class for all AI agents in the system.
-    
-    This class provides the common interface and functionality that all
-    specialized agents (supervisor, planner, researcher, verifier, writer)
-    must implement.
-    
-    TODO:
-    - Initialize agent with configuration and tools
-    - Define common attributes (name, role, capabilities)
-    - Implement shared agent behaviors
+    Base class for all AI agents.
+
+    Every specialized agent should inherit from this class.
+
+    Responsibilities:
+    - Store common agent information
+    - Provide access to the shared LLM client
+    - Define a common execution interface
     """
-    
+
+    def __init__(self, name: str, role: str):
+        """
+        Initialize the base agent.
+
+        Args:
+            name: Human-readable agent name.
+            role: Agent responsibility.
+        """
+
+        self.name = name
+        self.role = role
+        self.llm = LLMClient()
+
+    @abstractmethod
     def execute(self, input_data):
         """
         Execute the agent's primary task.
-        
+
+        Every child agent MUST implement this method.
+
         Args:
-            input_data: The input data required for task execution.
-            
+            input_data:
+                Input required for execution.
+
         Returns:
-            The result of the agent's execution.
-            
-        TODO:
-        - Implement task execution logic
-        - Handle agent-specific processing
-        - Return structured output
+            Agent output.
         """
-        pass
-    
+        raise NotImplementedError(
+            "Child agents must implement the execute() method."
+        )
+
     def validate(self, input_data):
         """
-        Validate input data before execution.
-        
+        Validate input before execution.
+
         Args:
-            input_data: The data to validate.
-            
+            input_data:
+                Input data.
+
         Returns:
-            bool: True if valid, False otherwise.
-            
-        TODO:
-        - Implement input validation logic
-        - Check data types and formats
-        - Validate against agent requirements
+            bool
         """
-        pass
-    
+
+        if input_data is None:
+            return False
+
+        return True
+
     def cleanup(self):
         """
-        Clean up resources after execution.
-        
-        TODO:
-        - Release any held resources
-        - Clear temporary data
-        - Reset agent state
+        Cleanup resources after execution.
+
+        Reserved for future enhancements.
         """
-        pass
+
+        return None
