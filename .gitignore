@@ -141,3 +141,24 @@ reports/generated/*
 !reports/generated/.gitkeep
 memory/vectorstore/*
 !memory/vectorstore/.gitkeep
+
+# ===============================
+# AutoResearchAI
+# ===============================
+
+# Local model cache
+models/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Runtime logs
+logs/
+
+# macOS metadata
+.AppleDouble
+.LSOverride
+
+# Windows Explorer
+Desktop.ini

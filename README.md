@@ -1,68 +1,282 @@
-# AutoResearchAI
+<div align="center">
 
-## Project Overview
+# 🧠 AutoResearchAI
 
-AutoResearchAI is an Autonomous Multi-Agent Research Platform designed to conduct comprehensive research tasks through coordinated AI agents. The platform leverages multiple specialized agents working together to plan, research, verify, and generate high-quality research reports on any given topic.
+### Production-Grade Multi-Agent AI Research Platform
 
-## Vision
+Build intelligent research workflows using multiple AI agents, FastAPI, and OpenRouter.
 
-To create a fully autonomous research system that can:
-- Decompose complex research queries into manageable sub-tasks
-- Conduct thorough research using multiple sources and tools
-- Verify information accuracy and credibility
-- Synthesize findings into coherent, well-structured reports
-- Maintain context and learn from previous research sessions
+![Python](https://img.shields.io/badge/Python-3.12-blue?logo=python)
+![FastAPI](https://img.shields.io/badge/FastAPI-Production-green?logo=fastapi)
+![OpenRouter](https://img.shields.io/badge/OpenRouter-LLM-orange)
+![REST API](https://img.shields.io/badge/API-REST-red)
+![Status](https://img.shields.io/badge/Status-Active-success)
+![License](https://img.shields.io/badge/License-MIT-blue)
 
-## Folder Structure
+</div>
 
+---
+
+# 📖 Overview
+
+AutoResearchAI is a production-style Multi-Agent AI Research Platform designed to automate the complete research workflow.
+
+Instead of relying on a single AI response, the system divides research into specialized AI agents that collaborate to produce higher-quality, structured, and verifiable results.
+
+The project follows modern AI engineering practices including modular architecture, workflow orchestration, session management, REST APIs, and scalable backend design.
+
+---
+
+# ✨ Features
+
+- 🤖 Multi-Agent AI Architecture
+- 🧠 Planner Agent
+- 🔍 Research Agent
+- ✅ Verifier Agent
+- 📝 Writer Agent
+- ⚡ FastAPI Backend
+- 🌐 REST API
+- 🔄 Session-Based Workflow
+- 📚 Professional Report Generation
+- 📊 AI Fact Check
+- 📄 Markdown Report
+- 📑 PDF/DOCX Export (Coming Soon)
+- 💬 Follow-up Research (Planned)
+
+---
+
+# 🏗 Architecture
+
+```text
+                    User
+                      │
+                      ▼
+              FastAPI REST API
+                      │
+                      ▼
+          Workflow Orchestrator
+                      │
+      ┌───────────────┼───────────────┐
+      ▼               ▼               ▼
+ Planner Agent   Research Agent   Session Manager
+                      │
+                      ▼
+              Verification Agent
+                      │
+                      ▼
+                Writer Agent
+                      │
+                      ▼
+              Professional Report
 ```
+
+---
+
+# ⚙ Current Workflow
+
+```text
+User Query
+      │
+      ▼
+Planner Agent (Hidden)
+      │
+      ▼
+Research Agent
+      │
+      ▼
+Research Results
+      │
+      ├──────────────► AI Fact Check
+      │                    │
+      │                    ▼
+      │             Verifier Agent
+      │                    │
+      │                    ▼
+      │             Verified Report
+      │
+      └──────────────► Generate Report
+                           │
+                           ▼
+                      Writer Agent
+                           │
+                           ▼
+                  Professional Report
+```
+
+---
+
+# 🛠 Tech Stack
+
+| Category | Technologies |
+|----------|--------------|
+| Language | Python |
+| Backend | FastAPI |
+| AI Provider | OpenRouter |
+| AI Model | OpenRouter Auto |
+| API Style | REST API |
+| Configuration | Pydantic Settings |
+| Validation | Pydantic |
+| Server | Uvicorn |
+| Version Control | Git + GitHub |
+
+---
+
+# 📂 Project Structure
+
+```text
 AutoResearchAI/
-├── backend/
-│   ├── api/           # API endpoints and routes
-│   ├── core/          # Core business logic
-│   ├── services/      # Service layer implementations
-│   ├── models/        # Database models
-│   ├── schemas/       # Pydantic schemas for validation
-│   └── utils/         # Utility functions
-├── frontend/          # Frontend application
-├── agents/            # AI agent implementations
-├── tools/             # Research tools and integrations
-├── prompts/           # Agent prompt templates
-├── memory/
-│   └── vectorstore/   # Vector database for memory storage
-├── database/
-│   └── sqlite/        # SQLite database files
-├── reports/
-│   └── generated/     # Generated research reports
-├── config/            # Configuration files
-├── tests/             # Test suites
-├── docker/            # Docker configurations
-├── docs/              # Documentation
-│   ├── architecture.md
-│   ├── workflow.md
-│   └── roadmap.md
-├── scripts/           # Utility scripts
-├── README.md
-├── requirements.txt
-├── .gitignore
-├── .env.example
-└── LICENSE
+
+backend/
+│
+├── agents/
+├── api/
+├── core/
+├── prompts/
+├── schemas/
+├── utils/
+│
+├── main.py
+│
+tests/
+│
+requirements.txt
+README.md
 ```
 
-## Technology Stack
+---
 
-- **Backend**: Python
-- **Database**: SQLite
-- **Memory**: Vector Database (TBD)
-- **API**: (TBD)
-- **Frontend**: (TBD)
-- **AI/ML**: LLM-based agents via OpenRouter API
-- **Search**: Brave Search API
+# 🚀 API Endpoints
 
-## Roadmap
+| Method | Endpoint | Description |
+|---------|----------|-------------|
+| GET | / | Health Check |
+| POST | /research | Generate Research |
+| POST | /verify/{session_id} | AI Fact Check |
+| POST | /report/{session_id} | Generate Professional Report |
 
-See [docs/roadmap.md](docs/roadmap.md) for detailed roadmap information.
+---
 
-## License
+# 🚀 Getting Started
 
-See [LICENSE](LICENSE) file for details.
+## Clone Repository
+
+```bash
+git clone https://github.com/hiteshnathbuva/AutoResearchAI.git
+
+cd AutoResearchAI
+```
+
+## Create Virtual Environment
+
+```bash
+python -m venv .venv
+```
+
+Activate environment
+
+Windows
+
+```bash
+.venv\Scripts\activate
+```
+
+Linux / macOS
+
+```bash
+source .venv/bin/activate
+```
+
+---
+
+## Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+## Configure Environment
+
+Create a `.env` file in the project root.
+
+```env
+OPENROUTER_API_KEY=your_api_key_here
+```
+
+---
+
+## Run Backend
+
+```bash
+python -m uvicorn backend.main:app --reload
+```
+
+Open
+
+```
+http://127.0.0.1:8000/docs
+```
+
+---
+
+# 🗺 Roadmap
+
+## ✅ Completed
+
+- Multi-Agent Architecture
+- Workflow Engine
+- Planner Agent
+- Research Agent
+- Verifier Agent
+- Writer Agent
+- FastAPI Backend
+- REST API
+- Session Management
+- Swagger Documentation
+
+## 🚧 In Progress
+
+- Repository Improvements
+- React Frontend
+- Professional Dashboard
+
+## 🔮 Planned
+
+- PDF Export
+- DOCX Export
+- Follow-up Research
+- Visual Reports
+- Internet Search Integration
+- RAG Knowledge Base
+- Authentication
+- Conversation History
+- Docker Deployment
+
+---
+
+# 🤝 Contributing
+
+Contributions, issues, and feature requests are welcome.
+
+Feel free to fork the project and submit pull requests.
+
+---
+
+# 📄 License
+
+This project is licensed under the MIT License.
+
+---
+
+# 👨‍💻 Author
+
+**Hitesh Nathbuva**
+
+GitHub
+
+https://github.com/hiteshnathbuva
+
+---
+
+⭐ If you found this project useful, consider giving it a star.
