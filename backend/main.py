@@ -13,6 +13,7 @@ Responsibilities:
 
 from fastapi import FastAPI
 
+from backend.api.routes import router
 from backend.core.config import settings
 
 # ==========================================================
@@ -24,6 +25,12 @@ app = FastAPI(
     version=settings.APP_VERSION,
     description="Production-grade Multi-Agent Research Platform",
 )
+
+# ==========================================================
+# Register API Routes
+# ==========================================================
+
+app.include_router(router)
 
 
 # ==========================================================
