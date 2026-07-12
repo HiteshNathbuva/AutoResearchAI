@@ -36,6 +36,12 @@ class WriterAgent(BaseAgent):
 
         system_prompt = load_prompt("writer.md")
 
+        verification_context = (
+            state.verification
+            if state.verification
+            else "No verification was requested. Generate the report directly from the research."
+        )
+
         messages = [
             {
                 "role": "system",
@@ -52,13 +58,30 @@ Research Plan:
 
 {state.plan}
 
-Research Notes:
+Research Output:
 
 {state.research}
 
-Verification Report:
+Verification Result:
 
-{state.verification}
+{verification_context}
+
+Instructions:
+
+- If the verification recommends improvements,
+  incorporate them before writing the report.
+
+- If the verification says the research is ready,
+  generate the report directly.
+
+- If no verification exists,
+  generate the report from the research output.
+
+The final report must be concise,
+professional,
+well-structured,
+easy to read,
+and suitable for export as Markdown, PDF or DOCX.
 """
             },
         ]

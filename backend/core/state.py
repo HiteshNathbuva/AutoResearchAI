@@ -53,6 +53,19 @@ class WorkflowState:
         self.final_report = ""
 
         # ===============================
+        # Workflow Status
+        # ===============================
+
+        # Current workflow status
+        self.status = "Initialized"
+
+        # Confidence level shown to user
+        self.confidence = None
+
+        # Estimated reading time
+        self.reading_time = None
+
+        # ===============================
         # Future Workflow Features
         # ===============================
 
@@ -125,6 +138,54 @@ class WorkflowState:
 
         self._update_timestamp()
 
+    def set_final_report(self, report: str):
+        """
+        Store the final generated report.
+
+        Args:
+            report: Final report.
+        """
+
+        self.final_report = report
+
+        self._update_timestamp()
+
+    def update_status(self, status: str):
+        """
+        Update the current workflow status.
+
+        Args:
+            status: Current workflow status.
+        """
+
+        self.status = status
+
+        self._update_timestamp()
+
+    def set_confidence(self, confidence: str):
+        """
+        Store confidence level.
+
+        Args:
+            confidence: High / Medium / Low.
+        """
+
+        self.confidence = confidence
+
+        self._update_timestamp()
+
+    def set_reading_time(self, minutes: int):
+        """
+        Store estimated reading time.
+
+        Args:
+            minutes: Estimated reading time in minutes.
+        """
+
+        self.reading_time = minutes
+
+        self._update_timestamp()
+
     def mark_task_complete(self, task_name: str):
         """
         Mark a workflow task as completed.
@@ -137,17 +198,5 @@ class WorkflowState:
             self.completed_tasks.append(task_name)
 
         self.current_step = task_name
-
-        self._update_timestamp()
-
-    def set_final_report(self, report: str):
-        """
-        Store the final generated report.
-
-        Args:
-            report: Final report.
-        """
-
-        self.final_report = report
 
         self._update_timestamp()

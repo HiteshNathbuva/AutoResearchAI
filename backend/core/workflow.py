@@ -5,19 +5,31 @@ This module manages the execution of multi-agent research workflows.
 It coordinates the interaction between different agents and ensures
 proper task sequencing and state management.
 
-Current Pipeline:
+Default Product Flow:
 
 User Query
     ↓
-Planner
+Planner (Hidden)
     ↓
 Research
+    ↓
+Return Research To User
+
+Optional Actions:
+
+AI Fact Check
     ↓
 Verification
     ↓
 Writer
     ↓
-Final Report
+Verified Report
+
+Generate Professional Report
+    ↓
+Writer
+    ↓
+PDF / DOCX / Markdown
 
 Future Pipeline:
 
@@ -32,8 +44,6 @@ Research
 Verification
     ↓
 Writer
-    ↓
-Final Report
 """
 
 from backend.agents.planner_agent import PlannerAgent
@@ -60,59 +70,35 @@ class WorkflowOrchestrator:
         self.writer_agent = WriterAgent()
 
     def supervisor(self):
-        """
-        Supervisor Agent
-
-        TODO:
-        Implement in future.
-        """
-
         raise NotImplementedError(
             "Supervisor Agent has not been implemented yet."
         )
 
     def planner(self):
-        """
-        Planner Agent
-
-        TODO:
-        Reserved for future implementation.
-        """
-
         raise NotImplementedError(
             "Planner Agent has not been implemented yet."
         )
 
     def research(self, state):
-        """
-        Execute research stage.
-        """
-
         return self.research_agent.execute(state)
 
     def verification(self, state):
-        """
-        Execute verification stage.
-        """
-
         return self.verifier_agent.execute(state)
 
     def writer(self, state):
-        """
-        Execute writer stage.
-        """
-
         return self.writer_agent.execute(state)
+
+    # ==========================================================
+    # QUICK RESEARCH (Default)
+    # ==========================================================
 
     def execute_pipeline(self, query):
         """
-        Execute the complete workflow.
+        Execute quick research.
 
-        Args:
-            query: User research query.
+        Planner -> Research
 
-        Returns:
-            WorkflowState containing the complete workflow output.
+        Returns research immediately.
         """
 
         if not query.strip():
@@ -120,19 +106,88 @@ class WorkflowOrchestrator:
 
         state = WorkflowState(query=query)
 
-        # Planner Stage
+        # -------------------------
+        # Planning
+        # -------------------------
+
+        state.update_status("Planning")
+
         state.plan = self.planner_agent.execute(query)
+
         state.mark_task_complete("Planner")
 
-        # Research Stage
+        # -------------------------
+        # Research
+        # -------------------------
+
+        state.update_status("Researching")
+
         state = self.research(state)
+
         state.mark_task_complete("Research")
 
-        # Verification Stage
+        # -------------------------
+        # Research Finished
+        # -------------------------
+
+        state.update_status("Completed")
+
+        state.set_confidence("High")
+
+        state.set_reading_time(3)
+
+        return state
+
+    # ==========================================================
+    # OPTIONAL AI FACT CHECK
+    # ==========================================================
+
+    def verify_report(self, state):
+        """
+        Perform deep verification.
+
+        Research
+            ↓
+        Verification
+            ↓
+        Writer
+        """
+
+        state.update_status("Verifying")
+
         state = self.verification(state)
+
         state.mark_task_complete("Verification")
 
-        # Writer Stage
+        state.update_status("Writing")
+
         state = self.writer(state)
+
+        state.mark_task_complete("Writer")
+
+        state.update_status("Verified")
+
+        return state
+
+    # ==========================================================
+    # OPTIONAL PROFESSIONAL REPORT
+    # ==========================================================
+
+    def generate_report(self, state):
+        """
+        Generate report directly from research.
+
+        Research
+            ↓
+        Writer
+        """
+
+        state.update_status("Writing")
+
+        state = self.writer(state)
+
+        state.mark_task_complete("Writer")
+
+        state.update_status("Report Generated")
 
         return state
