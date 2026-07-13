@@ -50,7 +50,7 @@ function ResearchResult() {
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1,
+        staggerChildren: 0.08,
       },
     },
   };
@@ -60,7 +60,7 @@ function ResearchResult() {
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.4 },
+      transition: { duration: 0.35 },
     },
   };
 
@@ -86,7 +86,8 @@ function ResearchResult() {
       <motion.div
         variants={itemVariants}
         whileHover={{ y: -4 }}
-        className="relative rounded-2xl border border-white/10 bg-gradient-to-br from-slate-900/60 to-slate-950/60 backdrop-blur-xl overflow-hidden shadow-lg hover:shadow-xl hover:shadow-cyan-500/10 transition-all"
+        transition={{ duration: 0.2 }}
+        className="relative rounded-2xl border border-white/10 bg-gradient-to-br from-slate-900/60 to-slate-950/60 backdrop-blur-xl overflow-hidden shadow-lg hover:shadow-xl hover:shadow-cyan-500/10 transition-shadow"
       >
         {/* Header Section */}
         <div className="relative border-b border-white/10 bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-indigo-500/10 p-8">
@@ -174,17 +175,19 @@ function ResearchResult() {
           </div>
           <div className="flex flex-col sm:flex-row gap-3">
             <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="flex items-center justify-center gap-2 rounded-lg border border-white/20 bg-white/5 hover:bg-white/10 px-4 py-2.5 text-sm font-medium text-white transition-all"
+              whileHover={{ scale: 1.04, y: -1 }}
+              whileTap={{ scale: 0.96 }}
+              transition={{ duration: 0.15 }}
+              className="flex items-center justify-center gap-2 rounded-lg border border-white/20 bg-white/5 hover:bg-white/10 px-4 py-2.5 text-sm font-medium text-white transition-colors"
             >
               <Download size={18} />
               Export PDF
             </motion.button>
             <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/30 transition-all"
+              whileHover={{ scale: 1.04, y: -1 }}
+              whileTap={{ scale: 0.96 }}
+              transition={{ duration: 0.15 }}
+              className="flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/30 transition-shadow"
             >
               <Share2 size={18} />
               Share Report
@@ -200,12 +203,14 @@ function ResearchResult() {
           {mockReport.topSources.map((source) => (
             <motion.a
               key={source.id}
-              whileHover={{ x: 4, scale: 1.02 }}
+              whileHover={{ x: 3, scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              transition={{ duration: 0.15 }}
               href="#"
-              className="group relative rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 backdrop-blur-sm p-4 transition-all flex items-center justify-between"
+              className="group relative rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 backdrop-blur-sm p-4 transition-colors flex items-center justify-between"
             >
               <div>
-                <p className="font-medium text-white group-hover:text-cyan-400 transition">
+                <p className="font-medium text-white group-hover:text-cyan-400 transition-colors duration-150">
                   {source.name}
                 </p>
                 <p className="mt-1 text-sm text-slate-400">

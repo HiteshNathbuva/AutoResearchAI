@@ -46,7 +46,7 @@ function WorkflowProgress() {
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1,
+        staggerChildren: 0.08,
       },
     },
   };
@@ -56,7 +56,7 @@ function WorkflowProgress() {
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.4 },
+      transition: { duration: 0.35 },
     },
   };
 
@@ -159,6 +159,7 @@ function WorkflowProgress() {
                   <div className="flex items-start gap-4 pr-12">
                     <motion.div
                       whileHover={{ rotate: 10, scale: 1.1 }}
+                      transition={{ duration: 0.2 }}
                       className={`flex h-12 w-12 items-center justify-center rounded-xl border ${
                         agent.status === "completed"
                           ? "border-cyan-500/40 bg-cyan-500/15"

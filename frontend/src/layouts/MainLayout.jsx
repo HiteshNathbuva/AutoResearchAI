@@ -1,7 +1,27 @@
-import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowUp } from "lucide-react";
 import Navbar from "../components/common/Navbar";
 
 function MainLayout({ children }) {
+  const [showBackToTop, setShowBackToTop] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowBackToTop(window.scrollY > 400);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
+
   return (
     <div className="relative min-h-screen bg-slate-950 text-white overflow-hidden">
       {/* Animated Background Elements */}
@@ -70,38 +90,76 @@ function MainLayout({ children }) {
       </main>
 
       {/* Footer */}
-      <footer className="relative border-t border-white/10 py-8 bg-gradient-to-r from-slate-950/50 via-slate-950/30 to-slate-950/50 backdrop-blur-sm">
-        <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-10">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-sm text-slate-400">
-              © {new Date().getFullYear()} AutoResearchAI • Production Grade Multi-Agent Research Platform
-            </p>
-            <div className="flex gap-6">
-              <a href="#" className="text-sm text-slate-400 hover:text-slate-300 transition">
-                Documentation
-              </a>
-              <a href="#" className="text-sm text-slate-400 hover:text-slate-300 transition">
-                API Reference
-              </a>
-              <a href="#" className="text-sm text-slate-400 hover:text-slate-300 transition">
-                Status
-              </a>
+      <footer className="relative border-t border-white/10 mt-20 bg-gradient-to-b from-slate-950/50 to-slate-950/80 backdrop-blur-sm">
+        <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-10 py-12">
+          {/* Footer Content */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+            {/* Branding */}
+            <div className="space-y-3">
+              <h3 className="text-sm font-bold tracking-tight text-white">AutoResearchAI</h3>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                Multi-agent intelligence for professional research. Automate planning, analysis, verification, and reporting.
+              </p>
             </div>
+
+            {/* Quick Links */}
+            <div className="space-y-3">
+              <h4 className="text-xs font-semibold uppercase tracking-widest text-slate-300">Quick Links</h4>
+              <ul className="space-y-2">
+                <li><a href="#" className="text-xs text-slate-400 hover:text-slate-300 transition">Research</a></li>
+                <li><a href="#" className="text-xs text-slate-400 hover:text-slate-300 transition">Reports</a></li>
+                <li><a href="#" className="text-xs text-slate-400 hover:text-slate-300 transition">History</a></li>
+                <li><a href="#" className="text-xs text-slate-400 hover:text-slate-300 transition">Knowledge Hub</a></li>
+              </ul>
+            </div>
+
+            {/* Resources */}
+            <div className="space-y-3">
+              <h4 className="text-xs font-semibold uppercase tracking-widest text-slate-300">Resources</h4>
+              <ul className="space-y-2">
+                <li><a href="#" className="text-xs text-slate-400 hover:text-slate-300 transition">Documentation</a></li>
+                <li><a href="#" className="text-xs text-slate-400 hover:text-slate-300 transition">API Reference</a></li>
+                <li><a href="#" className="text-xs text-slate-400 hover:text-slate-300 transition">GitHub</a></li>
+                <li><a href="#" className="text-xs text-slate-400 hover:text-slate-300 transition">Status</a></li>
+              </ul>
+            </div>
+
+            {/* Legal */}
+            <div className="space-y-3">
+              <h4 className="text-xs font-semibold uppercase tracking-widest text-slate-300">Legal</h4>
+              <ul className="space-y-2">
+                <li><a href="#" className="text-xs text-slate-400 hover:text-slate-300 transition">Privacy Policy</a></li>
+                <li><a href="#" className="text-xs text-slate-400 hover:text-slate-300 transition">Terms of Service</a></li>
+                <li><a href="#" className="text-xs text-slate-400 hover:text-slate-300 transition">Cookies</a></li>
+                <li><a href="#" className="text-xs text-slate-400 hover:text-slate-300 transition">Contact</a></li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Footer Divider */}
+          <div className="border-t border-white/5 pt-6">
+            <p className="text-xs text-slate-500 text-center">
+              © {new Date().getFullYear()} AutoResearchAI. All rights reserved. Production Grade Multi-Agent Research Platform.
+            </p>
           </div>
         </div>
       </footer>
 
-      {/* Scroll indicator */}
-      <motion.div
-        animate={{ y: [0, 6, 0] }}
-        transition={{ duration: 2, repeat: Infinity }}
-        className="fixed bottom-8 left-1/2 transform -translate-x-1/2 hidden lg:flex flex-col items-center gap-2 text-slate-500 pointer-events-none"
-      >
-        <p className="text-xs font-semibold uppercase tracking-widest">Scroll</p>
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-        </svg>
-      </motion.div>
+      {/* Back To Top Button */}
+      <AnimatePresence>
+        {showBackToTop && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.8, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.8, y: 20 }}
+            transition={{ duration: 0.2 }}
+            onClick={scrollToTop}
+            className="fixed bottom-8 right-8 z-40 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 p-3 text-white shadow-lg shadow-cyan-500/30 hover:shadow-cyan-500/50 transition-all hover:scale-110"
+          >
+            <ArrowUp size={20} />
+          </motion.button>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

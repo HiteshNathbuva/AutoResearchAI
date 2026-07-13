@@ -18,7 +18,7 @@ function ResearchInput() {
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.5 },
+      transition: { duration: 0.4 },
     },
   };
 
@@ -53,12 +53,13 @@ function ResearchInput() {
           <div className="space-y-4">
             <motion.div
               animate={{ scale: isFocused ? 1.02 : 1 }}
+              transition={{ duration: 0.2 }}
               className="relative"
             >
-              <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center justify-center h-5 w-5">
                 <Search
-                  size={20}
-                  className={`transition-colors duration-300 ${
+                  size={18}
+                  className={`transition-colors duration-200 ${
                     isFocused ? "text-cyan-400" : "text-slate-500"
                   }`}
                 />
@@ -71,13 +72,14 @@ function ResearchInput() {
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setIsFocused(false)}
                 placeholder="Ask anything... What do you want to research?"
-                className="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-20 py-4 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500/50 focus:bg-white/10 focus:ring-2 focus:ring-cyan-500/20 transition-all duration-300"
+                className="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-16 py-4 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500/50 focus:bg-white/10 focus:ring-2 focus:ring-cyan-500/20 transition-all duration-200"
               />
 
               <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 p-2.5 text-white hover:shadow-lg hover:shadow-cyan-500/20 transition-all"
+                whileHover={{ scale: 1.08 }}
+                whileTap={{ scale: 0.94 }}
+                transition={{ duration: 0.15 }}
+                className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 p-2 text-white hover:shadow-lg hover:shadow-cyan-500/30 transition-shadow"
               >
                 <Sparkles size={18} />
               </motion.button>
@@ -86,18 +88,20 @@ function ResearchInput() {
             {/* Action Buttons */}
             <div className="flex flex-wrap gap-2">
               <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 backdrop-blur-sm px-4 py-2.5 text-sm font-medium text-slate-300 hover:text-white transition-all"
+                whileHover={{ scale: 1.04, y: -1 }}
+                whileTap={{ scale: 0.96 }}
+                transition={{ duration: 0.15 }}
+                className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 backdrop-blur-sm px-4 py-2.5 text-sm font-medium text-slate-300 hover:text-white transition-colors"
               >
                 <Plus size={16} />
                 Add Sources
               </motion.button>
 
               <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 backdrop-blur-sm px-4 py-2.5 text-sm font-medium text-slate-300 hover:text-white transition-all"
+                whileHover={{ scale: 1.04, y: -1 }}
+                whileTap={{ scale: 0.96 }}
+                transition={{ duration: 0.15 }}
+                className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 backdrop-blur-sm px-4 py-2.5 text-sm font-medium text-slate-300 hover:text-white transition-colors"
               >
                 <Filter size={16} />
                 Filters
@@ -117,12 +121,13 @@ function ResearchInput() {
               {suggestedQueries.map((suggestion, idx) => (
                 <motion.button
                   key={idx}
-                  whileHover={{ scale: 1.02, x: 4 }}
-                  whileTap={{ scale: 0.98 }}
+                  whileHover={{ scale: 1.02, x: 3 }}
+                  whileTap={{ scale: 0.97 }}
+                  transition={{ duration: 0.15 }}
                   onClick={() => setQuery(suggestion)}
-                  className="group text-left rounded-lg border border-white/5 bg-white/5 hover:bg-white/10 hover:border-white/10 backdrop-blur-sm p-3 transition-all"
+                  className="group text-left rounded-lg border border-white/5 bg-white/5 hover:bg-white/10 hover:border-white/10 backdrop-blur-sm p-3 transition-colors"
                 >
-                  <p className="text-sm text-slate-300 group-hover:text-white transition">
+                  <p className="text-sm text-slate-300 group-hover:text-white transition-colors duration-150">
                     {suggestion}
                   </p>
                 </motion.button>

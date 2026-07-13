@@ -18,7 +18,7 @@ function HeroSection() {
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.6, ease: "easeOut" },
+      transition: { duration: 0.4, ease: "easeOut" },
     },
   };
 
@@ -49,7 +49,7 @@ function HeroSection() {
 
         {/* Main Headline */}
         <motion.div variants={itemVariants} className="space-y-6">
-          <h1 className="mx-auto text-5xl sm:text-6xl md:text-7xl font-bold tracking-tight leading-tight text-white">
+          <h1 className="mx-auto text-5xl sm:text-6xl md:text-7xl font-bold tracking-tight leading-[1.15] text-white">
             Research Faster
             <br />
             <span className="inline-block bg-gradient-to-r from-cyan-400 via-blue-400 to-indigo-400 bg-clip-text text-transparent">
@@ -73,17 +73,19 @@ function HeroSection() {
         >
           <motion.button
             whileHover={{ scale: 1.03, y: -2 }}
-            whileTap={{ scale: 0.98 }}
-            className="group flex items-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 px-8 py-3.5 font-semibold text-white shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 transition"
+            whileTap={{ scale: 0.97 }}
+            transition={{ duration: 0.2 }}
+            className="group flex items-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 px-8 py-3.5 font-semibold text-white shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 transition-shadow"
           >
             Start Research
-            <ArrowRight size={20} className="group-hover:translate-x-1 transition" />
+            <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform duration-150" />
           </motion.button>
 
           <motion.button
             whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.98 }}
-            className="rounded-xl border border-white/20 bg-white/5 hover:bg-white/10 backdrop-blur-sm px-8 py-3.5 font-semibold text-white transition"
+            whileTap={{ scale: 0.97 }}
+            transition={{ duration: 0.2 }}
+            className="rounded-xl border border-white/20 bg-white/5 hover:bg-white/10 backdrop-blur-sm px-8 py-3.5 font-semibold text-white transition-colors"
           >
             View Demo
           </motion.button>
