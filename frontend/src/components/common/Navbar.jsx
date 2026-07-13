@@ -41,7 +41,7 @@ function Navbar() {
       initial={{ y: -70, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.45 }}
-      className="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-slate-950/75 backdrop-blur-2xl"
+      className="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-slate-950/80 backdrop-blur-2xl shadow-lg shadow-cyan-500/5"
     >
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6 lg:px-10">
 
@@ -54,7 +54,8 @@ function Navbar() {
               scale: 1.08,
               rotate: 3,
             }}
-            className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-400 via-blue-500 to-indigo-600 shadow-lg shadow-cyan-500/20"
+            whileTap={{ scale: 0.96 }}
+            className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-400 via-blue-500 to-indigo-600 shadow-lg shadow-cyan-500/30 hover:shadow-cyan-500/50 transition-shadow"
           >
             <span className="text-lg font-bold tracking-wider text-white">
               AR
@@ -75,9 +76,14 @@ function Navbar() {
 
             </div>
 
-            <p className="text-xs text-slate-400">
-              AI Research Operating System
-            </p>
+            <motion.p
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 0.6, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="text-xs text-slate-500 transition-colors duration-200"
+            >
+              AI-powered research intelligence
+            </motion.p>
 
           </div>
 
@@ -94,16 +100,17 @@ function Navbar() {
             return (
               <motion.a
                 whileHover={{ y: -2 }}
+                whileTap={{ scale: 0.95 }}
                 key={item.name}
                 href={item.href}
-                className="group relative flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium text-slate-300 transition hover:text-white"
+                className="group relative flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium text-slate-300 transition-colors hover:text-white"
               >
 
                 <Icon size={17} />
 
                 {item.name}
 
-                <span className="absolute bottom-0 left-4 h-[2px] w-0 rounded-full bg-cyan-400 transition-all duration-300 group-hover:w-[60%]" />
+                <span className="absolute bottom-0 left-4 h-[2px] w-0 rounded-full bg-cyan-400 transition-all duration-200 group-hover:w-[60%]" />
 
               </motion.a>
             );
@@ -118,12 +125,14 @@ function Navbar() {
 
           <motion.button
             whileHover={{
-              scale: 1.03,
+              scale: 1.04,
+              y: -1,
             }}
             whileTap={{
-              scale: 0.97,
+              scale: 0.96,
             }}
-            className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-cyan-500/20 transition"
+            transition={{ duration: 0.15 }}
+            className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/40 transition-shadow"
           >
 
             <Plus size={18} />
