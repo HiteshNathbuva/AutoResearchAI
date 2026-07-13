@@ -43,7 +43,8 @@ function ResearchInput() {
       {/* Research Input Card */}
       <motion.div
         whileHover={{ y: -2 }}
-        className="group relative rounded-2xl border border-white/10 bg-gradient-to-br from-slate-900/60 via-slate-900/40 to-slate-950/60 backdrop-blur-2xl overflow-hidden shadow-lg hover:shadow-xl hover:shadow-cyan-500/10 transition-all duration-300"
+        transition={{ duration: 0.2 }}
+        className="group relative rounded-2xl border border-white/10 bg-gradient-to-br from-slate-900/60 via-slate-900/40 to-slate-950/60 backdrop-blur-2xl overflow-hidden shadow-lg hover:shadow-xl hover:shadow-cyan-500/10 transition-shadow duration-200"
       >
         {/* Gradient Border Effect */}
         <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/0 via-cyan-500/0 to-blue-500/0 group-hover:from-cyan-500/10 group-hover:via-cyan-500/5 group-hover:to-blue-500/10 pointer-events-none transition-all duration-500" />

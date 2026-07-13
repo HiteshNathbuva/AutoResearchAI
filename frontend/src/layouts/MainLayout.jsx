@@ -89,58 +89,79 @@ function MainLayout({ children }) {
         </motion.div>
       </main>
 
-      {/* Footer */}
-      <footer className="relative border-t border-white/10 mt-20 bg-gradient-to-b from-slate-950/50 to-slate-950/80 backdrop-blur-sm">
-        <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-10 py-12">
-          {/* Footer Content */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-            {/* Branding */}
-            <div className="space-y-3">
-              <h3 className="text-sm font-bold tracking-tight text-white">AutoResearchAI</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Multi-agent intelligence for professional research. Automate planning, analysis, verification, and reporting.
+      {/* Premium Footer */}
+      <footer className="relative border-t border-white/10 bg-gradient-to-b from-slate-950 via-slate-950/95 to-slate-900/50 backdrop-blur-xl">
+        <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-10 py-16">
+          {/* Main Footer Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-12 mb-16">
+            {/* Brand Section */}
+            <div className="lg:col-span-2 space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-400 via-blue-500 to-indigo-600 shadow-lg shadow-cyan-500/20">
+                  <span className="text-sm font-bold text-white">AR</span>
+                </div>
+                <div>
+                  <h3 className="text-base font-bold tracking-tight text-white">AutoResearchAI</h3>
+                  <p className="text-[10px] text-cyan-400 font-semibold uppercase tracking-widest">Beta</p>
+                </div>
+              </div>
+              <p className="text-sm leading-relaxed text-slate-400 max-w-sm">
+                Multi-agent intelligence for professional research. Automate planning, analysis, verification, and reporting with advanced AI workflows.
+              </p>
+              <p className="text-xs text-slate-500 flex items-center gap-2">
+                <span>Made with</span>
+                <span className="text-red-500">❤</span>
+                <span>for AI Research</span>
               </p>
             </div>
 
             {/* Quick Links */}
-            <div className="space-y-3">
-              <h4 className="text-xs font-semibold uppercase tracking-widest text-slate-300">Quick Links</h4>
-              <ul className="space-y-2">
-                <li><a href="#" className="text-xs text-slate-400 hover:text-slate-300 transition">Research</a></li>
-                <li><a href="#" className="text-xs text-slate-400 hover:text-slate-300 transition">Reports</a></li>
-                <li><a href="#" className="text-xs text-slate-400 hover:text-slate-300 transition">History</a></li>
-                <li><a href="#" className="text-xs text-slate-400 hover:text-slate-300 transition">Knowledge Hub</a></li>
+            <div className="space-y-4">
+              <h4 className="text-xs font-bold uppercase tracking-widest text-white">Quick Links</h4>
+              <ul className="space-y-3">
+                <li><a href="#" className="text-sm text-slate-400 hover:text-cyan-400 transition-colors duration-150">Research</a></li>
+                <li><a href="#" className="text-sm text-slate-400 hover:text-cyan-400 transition-colors duration-150">Reports</a></li>
+                <li><a href="#" className="text-sm text-slate-400 hover:text-cyan-400 transition-colors duration-150">History</a></li>
+                <li><a href="#" className="text-sm text-slate-400 hover:text-cyan-400 transition-colors duration-150">Knowledge Hub</a></li>
               </ul>
             </div>
 
             {/* Resources */}
-            <div className="space-y-3">
-              <h4 className="text-xs font-semibold uppercase tracking-widest text-slate-300">Resources</h4>
-              <ul className="space-y-2">
-                <li><a href="#" className="text-xs text-slate-400 hover:text-slate-300 transition">Documentation</a></li>
-                <li><a href="#" className="text-xs text-slate-400 hover:text-slate-300 transition">API Reference</a></li>
-                <li><a href="#" className="text-xs text-slate-400 hover:text-slate-300 transition">GitHub</a></li>
-                <li><a href="#" className="text-xs text-slate-400 hover:text-slate-300 transition">Status</a></li>
+            <div className="space-y-4">
+              <h4 className="text-xs font-bold uppercase tracking-widest text-white">Resources</h4>
+              <ul className="space-y-3">
+                <li><a href="#" className="text-sm text-slate-400 hover:text-cyan-400 transition-colors duration-150">Documentation</a></li>
+                <li><a href="#" className="text-sm text-slate-400 hover:text-cyan-400 transition-colors duration-150">API Reference</a></li>
+                <li><a href="#" className="text-sm text-slate-400 hover:text-cyan-400 transition-colors duration-150">GitHub</a></li>
+                <li><a href="#" className="text-sm text-slate-400 hover:text-cyan-400 transition-colors duration-150">Status</a></li>
               </ul>
             </div>
 
             {/* Legal */}
-            <div className="space-y-3">
-              <h4 className="text-xs font-semibold uppercase tracking-widest text-slate-300">Legal</h4>
-              <ul className="space-y-2">
-                <li><a href="#" className="text-xs text-slate-400 hover:text-slate-300 transition">Privacy Policy</a></li>
-                <li><a href="#" className="text-xs text-slate-400 hover:text-slate-300 transition">Terms of Service</a></li>
-                <li><a href="#" className="text-xs text-slate-400 hover:text-slate-300 transition">Cookies</a></li>
-                <li><a href="#" className="text-xs text-slate-400 hover:text-slate-300 transition">Contact</a></li>
+            <div className="space-y-4">
+              <h4 className="text-xs font-bold uppercase tracking-widest text-white">Legal</h4>
+              <ul className="space-y-3">
+                <li><a href="#" className="text-sm text-slate-400 hover:text-cyan-400 transition-colors duration-150">Privacy</a></li>
+                <li><a href="#" className="text-sm text-slate-400 hover:text-cyan-400 transition-colors duration-150">Terms</a></li>
+                <li><a href="#" className="text-sm text-slate-400 hover:text-cyan-400 transition-colors duration-150">Cookies</a></li>
+                <li><a href="#" className="text-sm text-slate-400 hover:text-cyan-400 transition-colors duration-150">Contact</a></li>
               </ul>
             </div>
           </div>
 
-          {/* Footer Divider */}
-          <div className="border-t border-white/5 pt-6">
-            <p className="text-xs text-slate-500 text-center">
-              © {new Date().getFullYear()} AutoResearchAI. All rights reserved. Production Grade Multi-Agent Research Platform.
-            </p>
+          {/* Divider with gradient accent */}
+          <div className="relative py-8">
+            <div className="absolute inset-x-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+          </div>
+
+          {/* Bottom Footer */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+            <p>© {new Date().getFullYear()} AutoResearchAI. All rights reserved.</p>
+            <div className="inline-flex items-center gap-1 rounded-full bg-white/5 border border-white/10 px-3 py-1">
+              <span className="text-[10px] text-slate-400">Version</span>
+              <span className="font-semibold text-slate-300">1.0</span>
+              <span className="text-[10px] text-cyan-400 font-semibold">BETA</span>
+            </div>
           </div>
         </div>
       </footer>

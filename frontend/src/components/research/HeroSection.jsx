@@ -49,10 +49,10 @@ function HeroSection() {
 
         {/* Main Headline */}
         <motion.div variants={itemVariants} className="space-y-6">
-          <h1 className="mx-auto text-5xl sm:text-6xl md:text-7xl font-bold tracking-tight leading-[1.15] text-white">
+          <h1 className="mx-auto max-w-4xl text-5xl sm:text-6xl lg:text-7xl font-bold tracking-normal leading-[1.2] text-white">
             Research Faster
-            <br />
-            <span className="inline-block bg-gradient-to-r from-cyan-400 via-blue-400 to-indigo-400 bg-clip-text text-transparent">
+            <br className="hidden sm:inline" />
+            <span className="block bg-gradient-to-r from-cyan-400 via-blue-400 to-indigo-400 bg-clip-text text-transparent">
               With Intelligent Agents
             </span>
           </h1>
@@ -61,7 +61,7 @@ function HeroSection() {
         {/* Subheading */}
         <motion.p
           variants={itemVariants}
-          className="mx-auto max-w-2xl text-lg sm:text-xl leading-relaxed text-slate-300"
+          className="mx-auto max-w-2xl text-base sm:text-lg leading-relaxed text-slate-400"
         >
           Automate planning, research, verification, report generation and source validation through our advanced multi-agent workflow ecosystem.
         </motion.p>
@@ -69,7 +69,7 @@ function HeroSection() {
         {/* CTA Buttons */}
         <motion.div
           variants={itemVariants}
-          className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4"
+          className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-8"
         >
           <motion.button
             whileHover={{ scale: 1.03, y: -2 }}

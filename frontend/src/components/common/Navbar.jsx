@@ -78,11 +78,11 @@ function Navbar() {
 
             <motion.p
               initial={{ opacity: 0, y: 4 }}
-              animate={{ opacity: 0.7, y: 0 }}
+              animate={{ opacity: 0.6, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
-              className="text-xs text-slate-400 hover:text-slate-300 transition"
+              className="text-xs text-slate-500 transition-colors duration-200"
             >
-              Multi-Agent Intelligence for Professional Research
+              AI-powered research intelligence
             </motion.p>
 
           </div>
@@ -125,12 +125,14 @@ function Navbar() {
 
           <motion.button
             whileHover={{
-              scale: 1.03,
+              scale: 1.04,
+              y: -1,
             }}
             whileTap={{
-              scale: 0.97,
+              scale: 0.96,
             }}
-            className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-cyan-500/20 transition"
+            transition={{ duration: 0.15 }}
+            className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/40 transition-shadow"
           >
 
             <Plus size={18} />
