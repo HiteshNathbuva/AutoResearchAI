@@ -162,3 +162,26 @@ logs/
 
 # Windows Explorer
 Desktop.ini
+
+# ===============================
+# Node.js / Frontend
+# ===============================
+
+# Dependencies
+node_modules/
+frontend/node_modules/
+
+# Package manager
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Frontend Build
+frontend/dist/
+dist/
+
+# Vite
+.vite/
+
+# Environment
+frontend/.env
