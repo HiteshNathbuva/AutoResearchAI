@@ -46,7 +46,7 @@ function WorkflowProgress() {
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.08,
+        staggerChildren: 0.1,
       },
     },
   };
@@ -56,7 +56,7 @@ function WorkflowProgress() {
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.35 },
+      transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] },
     },
   };
 
@@ -95,17 +95,17 @@ function WorkflowProgress() {
       className="space-y-8"
     >
       {/* Header */}
-      <div>
-        <h2 className="text-2xl sm:text-3xl font-bold text-white">
+      <div className="space-y-2">
+        <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
           Workflow Progress
         </h2>
-        <p className="mt-2 text-slate-400">
+        <p className="text-slate-400 leading-relaxed">
           Watch as our intelligent agents work through each stage of the research process.
         </p>
       </div>
 
       {/* Agent Workflow */}
-      <div className="space-y-4">
+      <div className="space-y-5">
         {agents.map((agent, index) => {
           const Icon = agent.icon;
           const isLast = index === agents.length - 1;
@@ -117,8 +117,11 @@ function WorkflowProgress() {
               <div className="relative">
                 {/* Connecting Line */}
                 {!isLast && (
-                  <div
-                    className={`absolute left-8 top-24 h-12 w-0.5 ${
+                  <motion.div
+                    initial={{ height: 0 }}
+                    animate={{ height: 48 }}
+                    transition={{ duration: 0.5, delay: index * 0.1 + 0.3 }}
+                    className={`absolute left-8 top-24 w-0.5 ${
                       agent.status === "completed"
                         ? "bg-gradient-to-b from-cyan-500 to-cyan-500/30"
                         : agent.status === "active"
@@ -130,16 +133,18 @@ function WorkflowProgress() {
 
                 {/* Agent Card */}
                 <motion.div
-                  whileHover={{ x: 4 }}
-                  className={`relative rounded-2xl border ${statusBg} bg-gradient-to-br from-slate-900/60 to-slate-950/60 backdrop-blur-xl p-6 transition-all hover:shadow-lg hover:shadow-blue-500/10`}
+                  whileHover={{ x: 6, y: -2 }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={{ duration: 0.2 }}
+                  className={`relative rounded-2xl border ${statusBg} bg-gradient-to-br from-slate-900/70 via-slate-900/50 to-slate-950/70 backdrop-blur-xl p-6 transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/10`}
                 >
                   {/* Status Badge */}
                   <div className="absolute top-4 right-4">
                     {agent.status === "completed" ? (
                       <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        transition={{ type: "spring", delay: 0.2 }}
+                        initial={{ scale: 0, rotate: -180 }}
+                        animate={{ scale: 1, rotate: 0 }}
+                        transition={{ type: "spring", delay: 0.2, stiffness: 200 }}
                       >
                         <CheckCircle2 size={24} className="text-cyan-400" />
                       </motion.div>
@@ -159,6 +164,7 @@ function WorkflowProgress() {
                   <div className="flex items-start gap-4 pr-12">
                     <motion.div
                       whileHover={{ rotate: 10, scale: 1.1 }}
+                      whileTap={{ scale: 0.95 }}
                       transition={{ duration: 0.2 }}
                       className={`flex h-12 w-12 items-center justify-center rounded-xl border ${
                         agent.status === "completed"
@@ -166,7 +172,7 @@ function WorkflowProgress() {
                           : agent.status === "active"
                             ? "border-blue-500/40 bg-blue-500/15"
                             : "border-white/10 bg-white/5"
-                      } flex-shrink-0`}
+                      } flex-shrink-0 shadow-sm`}
                     >
                       <Icon
                         size={24}
@@ -178,19 +184,24 @@ function WorkflowProgress() {
                       <h3 className="flex items-center gap-2 text-lg font-semibold text-white">
                         {agent.name}
                         {agent.status === "active" && (
-                          <span className="inline-flex h-2 w-2 rounded-full bg-blue-400 animate-pulse" />
+                          <motion.span
+                            animate={{ opacity: [0.5, 1, 0.5] }}
+                            transition={{ duration: 1.5, repeat: Infinity }}
+                            className="inline-flex h-2 w-2 rounded-full bg-blue-400"
+                          />
                         )}
                       </h3>
-                      <p className="mt-1 text-sm text-slate-400">
+                      <p className="mt-1 text-sm text-slate-400 leading-relaxed">
                         {agent.description}
                       </p>
 
                       {/* Progress Bar */}
                       {agent.status !== "pending" && (
                         <motion.div
-                          className="mt-3 h-1.5 w-full rounded-full overflow-hidden bg-white/5"
+                          className="mt-4 h-1.5 w-full rounded-full overflow-hidden bg-white/5"
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
+                          transition={{ delay: 0.3 }}
                         >
                           <motion.div
                             className={`h-full rounded-full ${
@@ -202,7 +213,7 @@ function WorkflowProgress() {
                             animate={{
                               width: agent.status === "completed" ? "100%" : "60%",
                             }}
-                            transition={{ duration: 0.8, ease: "easeOut" }}
+                            transition={{ duration: 1, ease: [0.25, 0.1, 0.25, 1], delay: 0.4 }}
                           />
                         </motion.div>
                       )}
@@ -227,8 +238,10 @@ function WorkflowProgress() {
         ].map((stat) => (
           <motion.div
             key={stat.label}
-            whileHover={{ scale: 1.02 }}
-            className={`rounded-lg border border-white/10 bg-white/5 backdrop-blur-sm p-4 text-center transition-all hover:bg-white/10`}
+            whileHover={{ scale: 1.03, y: -2 }}
+            whileTap={{ scale: 0.98 }}
+            transition={{ duration: 0.2 }}
+            className="rounded-lg border border-white/10 bg-white/5 backdrop-blur-sm p-4 text-center transition-all duration-300 hover:bg-white/10 hover:border-white/20"
           >
             <p className={`text-2xl font-bold text-${stat.color}-400`}>
               {stat.value}

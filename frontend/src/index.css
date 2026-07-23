@@ -18,7 +18,9 @@ body,
 body {
   background: #020617;
   color: white;
-  font-family: Inter, system-ui, sans-serif;
+  font-family: Inter, system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Grid Pattern Overlay */
@@ -40,6 +42,7 @@ body {
   /* Custom scrollbar */
   ::-webkit-scrollbar {
     width: 8px;
+    height: 8px;
   }
 
   ::-webkit-scrollbar-track {
@@ -53,5 +56,22 @@ body {
 
   ::-webkit-scrollbar-thumb:hover {
     background: rgba(6, 182, 212, 0.5);
+  }
+
+  /* Focus visible for accessibility */
+  *:focus-visible {
+    outline: 2px solid rgba(6, 182, 212, 0.5);
+    outline-offset: 2px;
+  }
+
+  /* Reduce motion for accessibility */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 }

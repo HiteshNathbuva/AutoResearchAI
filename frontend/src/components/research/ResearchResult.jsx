@@ -50,7 +50,7 @@ function ResearchResult() {
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.08,
+        staggerChildren: 0.1,
       },
     },
   };
@@ -60,7 +60,7 @@ function ResearchResult() {
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.35 },
+      transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] },
     },
   };
 
@@ -73,11 +73,11 @@ function ResearchResult() {
       className="space-y-8"
     >
       {/* Header */}
-      <motion.div variants={itemVariants}>
-        <h2 className="text-2xl sm:text-3xl font-bold text-white">
+      <motion.div variants={itemVariants} className="space-y-2">
+        <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
           Research Report
         </h2>
-        <p className="mt-2 text-slate-400">
+        <p className="text-slate-400 leading-relaxed">
           Your comprehensive research findings, verified and compiled.
         </p>
       </motion.div>
@@ -86,8 +86,8 @@ function ResearchResult() {
       <motion.div
         variants={itemVariants}
         whileHover={{ y: -4 }}
-        transition={{ duration: 0.2 }}
-        className="relative rounded-2xl border border-white/10 bg-gradient-to-br from-slate-900/60 to-slate-950/60 backdrop-blur-xl overflow-hidden shadow-lg hover:shadow-xl hover:shadow-cyan-500/10 transition-shadow"
+        transition={{ duration: 0.3 }}
+        className="relative rounded-2xl border border-white/10 bg-gradient-to-br from-slate-900/70 via-slate-900/50 to-slate-950/70 backdrop-blur-xl overflow-hidden shadow-xl hover:shadow-2xl hover:shadow-cyan-500/10 transition-all duration-300"
       >
         {/* Header Section */}
         <div className="relative border-b border-white/10 bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-indigo-500/10 p-8">
@@ -96,21 +96,23 @@ function ResearchResult() {
               <h3 className="text-xl sm:text-2xl font-bold text-white">
                 {mockReport.title}
               </h3>
-              <p className="mt-2 text-slate-400 max-w-2xl">
+              <p className="mt-2 text-slate-400 max-w-2xl leading-relaxed">
                 {mockReport.summary}
               </p>
             </div>
 
             <motion.div
-              whileHover={{ scale: 1.05 }}
+              whileHover={{ scale: 1.05, y: -2 }}
+              whileTap={{ scale: 0.98 }}
+              transition={{ duration: 0.2 }}
               className="flex-shrink-0"
             >
-              <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-cyan-500/30 bg-cyan-500/10">
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-cyan-500/30 bg-gradient-to-br from-cyan-500/15 to-blue-500/15 shadow-lg shadow-cyan-500/20">
                 <div className="relative text-center">
                   <p className="text-2xl font-bold text-cyan-400">
                     {mockReport.confidence}%
                   </p>
-                  <p className="text-[10px] text-cyan-300 font-semibold">
+                  <p className="text-[10px] text-cyan-300 font-semibold uppercase tracking-wider">
                     Confidence
                   </p>
                 </div>
@@ -131,9 +133,11 @@ function ResearchResult() {
               <motion.div
                 key={idx}
                 variants={itemVariants}
+                whileHover={{ scale: 1.02 }}
+                transition={{ duration: 0.2 }}
                 className="flex items-center gap-3"
               >
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-cyan-500/15 border border-cyan-500/30">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-cyan-500/15 border border-cyan-500/30 shadow-sm">
                   <Icon size={20} className="text-cyan-400" />
                 </div>
                 <div>
@@ -153,13 +157,16 @@ function ResearchResult() {
             <motion.div
               key={section.id}
               variants={itemVariants}
-              className="rounded-lg border border-white/5 bg-white/5 p-4 hover:bg-white/10 hover:border-white/10 transition-all"
+              whileHover={{ x: 4, scale: 1.01 }}
+              whileTap={{ scale: 0.99 }}
+              transition={{ duration: 0.2 }}
+              className="rounded-lg border border-white/5 bg-white/5 p-4 hover:bg-white/10 hover:border-white/10 transition-all duration-300 cursor-pointer"
             >
               <h4 className="flex items-center gap-2 text-base font-semibold text-white">
                 <Book size={18} className="text-blue-400" />
                 {section.title}
               </h4>
-              <p className="mt-2 text-sm text-slate-400">
+              <p className="mt-2 text-sm text-slate-400 leading-relaxed">
                 {section.content}
               </p>
             </motion.div>
@@ -175,19 +182,19 @@ function ResearchResult() {
           </div>
           <div className="flex flex-col sm:flex-row gap-3">
             <motion.button
-              whileHover={{ scale: 1.04, y: -1 }}
-              whileTap={{ scale: 0.96 }}
+              whileHover={{ scale: 1.03, y: -1 }}
+              whileTap={{ scale: 0.97 }}
               transition={{ duration: 0.15 }}
-              className="flex items-center justify-center gap-2 rounded-lg border border-white/20 bg-white/5 hover:bg-white/10 px-4 py-2.5 text-sm font-medium text-white transition-colors"
+              className="flex items-center justify-center gap-2 rounded-lg border border-white/20 bg-white/5 hover:bg-white/10 px-4 py-2.5 text-sm font-medium text-white transition-all duration-200"
             >
               <Download size={18} />
               Export PDF
             </motion.button>
             <motion.button
-              whileHover={{ scale: 1.04, y: -1 }}
-              whileTap={{ scale: 0.96 }}
+              whileHover={{ scale: 1.03, y: -1 }}
+              whileTap={{ scale: 0.97 }}
               transition={{ duration: 0.15 }}
-              className="flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/30 transition-shadow"
+              className="flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/30 transition-all duration-300"
             >
               <Share2 size={18} />
               Share Report
@@ -203,24 +210,29 @@ function ResearchResult() {
           {mockReport.topSources.map((source) => (
             <motion.a
               key={source.id}
-              whileHover={{ x: 3, scale: 1.02 }}
+              whileHover={{ x: 4, scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               transition={{ duration: 0.15 }}
               href="#"
-              className="group relative rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 backdrop-blur-sm p-4 transition-colors flex items-center justify-between"
+              className="group relative rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 backdrop-blur-sm p-4 transition-all duration-300 flex items-center justify-between"
             >
               <div>
-                <p className="font-medium text-white group-hover:text-cyan-400 transition-colors duration-150">
+                <p className="font-medium text-white group-hover:text-cyan-400 transition-colors duration-200">
                   {source.name}
                 </p>
                 <p className="mt-1 text-sm text-slate-400">
                   {source.confidence}% confidence
                 </p>
               </div>
-              <ExternalLink
-                size={18}
-                className="text-slate-500 group-hover:text-cyan-400 transition flex-shrink-0"
-              />
+              <motion.div
+                whileHover={{ x: 2 }}
+                transition={{ duration: 0.2 }}
+              >
+                <ExternalLink
+                  size={18}
+                  className="text-slate-500 group-hover:text-cyan-400 transition-colors duration-200 flex-shrink-0"
+                />
+              </motion.div>
             </motion.a>
           ))}
         </div>
