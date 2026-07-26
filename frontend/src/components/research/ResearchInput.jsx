@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Search, Sparkles, Plus, Filter } from "lucide-react";
+import { Search, ArrowUp, Plus, Filter } from "lucide-react";
 
 function ResearchInput() {
   const [query, setQuery] = useState("");
@@ -12,6 +12,19 @@ function ResearchInput() {
     "Quantum computing breakthroughs",
     "Sustainable energy solutions",
   ];
+
+  const handleSubmit = () => {
+    if (query.trim()) {
+      console.log("Submitting research query:", query);
+      // Add submission logic here
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && query.trim()) {
+      handleSubmit();
+    }
+  };
 
   const containerVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -58,12 +71,11 @@ function ResearchInput() {
                 <motion.div
                   animate={{
                     scale: isFocused ? 1.1 : 1,
-                    rotate: isFocused ? 5 : 0,
                   }}
                   transition={{ duration: 0.2 }}
                 >
                   <Search
-                    size={20}
+                    size={18}
                     className={`transition-colors duration-300 ${
                       isFocused ? "text-cyan-400" : "text-slate-500"
                     }`}
@@ -77,18 +89,10 @@ function ResearchInput() {
                 onChange={(e) => setQuery(e.target.value)}
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setIsFocused(false)}
-                placeholder="Ask anything... What do you want to research?"
-                className="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-14 py-4 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500/50 focus:bg-white/10 focus:ring-2 focus:ring-cyan-500/20 transition-all duration-300"
+                onKeyDown={handleKeyDown}
+                placeholder="Ask anything..."
+                className="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-4 py-4 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500/50 focus:bg-white/10 focus:ring-2 focus:ring-cyan-500/20 transition-all duration-300"
               />
-
-              <motion.button
-                whileHover={{ scale: 1.08 }}
-                whileTap={{ scale: 0.92 }}
-                transition={{ duration: 0.15 }}
-                className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 p-2.5 text-white hover:shadow-lg hover:shadow-cyan-500/30 transition-all duration-300"
-              >
-                <Sparkles size={18} />
-              </motion.button>
             </div>
 
             {/* Action Buttons */}

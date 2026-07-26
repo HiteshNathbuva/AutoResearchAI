@@ -108,11 +108,11 @@ function ResearchResult() {
               className="flex-shrink-0"
             >
               <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-cyan-500/30 bg-gradient-to-br from-cyan-500/15 to-blue-500/15 shadow-lg shadow-cyan-500/20">
-                <div className="relative text-center">
-                  <p className="text-2xl font-bold text-cyan-400">
+                <div className="relative text-center leading-tight">
+                  <p className="text-xl font-bold text-cyan-400 leading-none">
                     {mockReport.confidence}%
                   </p>
-                  <p className="text-[10px] text-cyan-300 font-semibold uppercase tracking-wider">
+                  <p className="text-[8px] text-cyan-300 font-semibold uppercase tracking-wider leading-tight mt-0.5">
                     Confidence
                   </p>
                 </div>
