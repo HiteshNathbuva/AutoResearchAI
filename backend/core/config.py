@@ -1,6 +1,12 @@
-"""Typed environment configuration."""
+"""Typed environment configuration.
 
+Settings are resolved lazily through :func:`get_settings` so that importing any
+backend module never validates the environment or touches the filesystem.
+"""
+
+from functools import lru_cache
 from pathlib import Path
+from typing import List
 
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -25,8 +31,17 @@ class Settings(BaseSettings):
     LLM_MAX_RETRIES: int = Field(default=2, ge=0, le=5)
 
     @property
-    def cors_origins(self):
+    def cors_origins(self) -> List[str]:
         return [origin.strip() for origin in self.CORS_ORIGINS.split(",") if origin.strip()]
 
 
-settings = Settings()
+@lru_cache(maxsize=1)
+def get_settings() -> Settings:
+    """Return the process-wide settings instance (cached).
+
+    Importing this module has no side effects; the environment is validated on
+    the first call, which happens during application startup or explicitly in
+    tests.
+    """
+
+    return Settings()
