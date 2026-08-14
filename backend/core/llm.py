@@ -1,131 +1,42 @@
-"""
-LLM Abstraction Module
+"""OpenRouter-compatible LLM client with bounded retries."""
 
-This module provides a unified interface for interacting with Large Language Models.
-It abstracts the complexity of different LLM providers and offers a consistent API.
-
-Current Provider:
-- OpenRouter (Primary)
-
-Future Enhancements:
-- Streaming support
-- Retry mechanism
-- Multiple provider support (OpenAI, Anthropic, Gemini, etc.)
-- Model switching
-"""
+import time
 
 from openai import OpenAI
 
 from backend.core.config import settings
+from backend.core.exceptions import LLMError
+from backend.core.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 class LLMClient:
-    """
-    Unified LLM client for interacting with language models.
-
-    This class provides a consistent interface for making requests to
-    various LLM providers, starting with OpenRouter.
-    """
-
     def __init__(self):
-        """
-        Initialize the LLM client using application configuration.
-        """
-
-        self.client = OpenAI(
-            api_key=settings.OPENROUTER_API_KEY,
-            base_url="https://openrouter.ai/api/v1",
-        )
-
+        self.client = OpenAI(api_key=settings.OPENROUTER_API_KEY,
+                             base_url="https://openrouter.ai/api/v1",
+                             timeout=settings.LLM_TIMEOUT_SECONDS)
         self.model = settings.MODEL_NAME
         self.temperature = settings.TEMPERATURE
         self.max_tokens = settings.MAX_TOKENS
 
     def chat(self, messages, model=None):
-        """
-        Send a chat completion request to the LLM.
-
-        Args:
-            messages (list):
-                List of message dictionaries.
-
-            model (str, optional):
-                Override the default model.
-
-        Returns:
-            str:
-                Assistant response.
-        """
-
-        response = self.client.chat.completions.create(
-            model=model or self.model,
-            messages=messages,
-            temperature=self.temperature,
-            max_tokens=self.max_tokens,
-        )
-
-        return response.choices[0].message.content
-
-    def stream(self, messages, model=None):
-        """
-        Stream chat completion responses in real-time.
-
-        Args:
-            messages:
-                List of message dictionaries.
-
-            model:
-                Optional model override.
-
-        Yields:
-            Streaming response chunks.
-
-        TODO:
-        - Implement OpenRouter streaming
-        - Yield response chunks
-        - Handle interruptions
-        """
-
-        raise NotImplementedError(
-            "Streaming support has not been implemented yet."
-        )
-
-    def retry_request(self, request_func, max_retries=3):
-        """
-        Retry failed requests.
-
-        Args:
-            request_func:
-                Callable request function.
-
-            max_retries:
-                Maximum retry attempts.
-
-        Returns:
-            Successful response.
-
-        TODO:
-        - Implement exponential backoff
-        - Retry transient failures
-        - Handle rate limits
-        """
-
-        raise NotImplementedError(
-            "Retry mechanism has not been implemented yet."
-        )
+        for attempt in range(settings.LLM_MAX_RETRIES + 1):
+            try:
+                response = self.client.chat.completions.create(
+                    model=model or self.model, messages=messages,
+                    temperature=self.temperature, max_tokens=self.max_tokens)
+                content = response.choices[0].message.content
+                if not content:
+                    raise LLMError("The model returned an empty response.")
+                return content
+            except Exception as error:
+                if attempt >= settings.LLM_MAX_RETRIES:
+                    logger.exception("LLM request failed after retries")
+                    raise LLMError("The AI provider could not complete this request.") from error
+                time.sleep(0.5 * (attempt + 1))
 
     def switch_model(self, model_name):
-        """
-        Switch the active LLM model.
-
-        Args:
-            model_name:
-                New model name.
-
-        TODO:
-        - Validate model
-        - Update configuration
-        - Handle provider-specific settings
-        """
-
-        self.model = model_name
+        if not model_name or not model_name.strip():
+            raise ValueError("Model name cannot be empty.")
+        self.model = model_name.strip()

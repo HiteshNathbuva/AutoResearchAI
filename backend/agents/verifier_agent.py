@@ -53,6 +53,6 @@ class VerifierAgent(BaseAgent):
                 }
         ]
 
-        state.verification = self.llm.chat(messages)
+        state.update_verification(self.llm.chat(messages))
 
         return state

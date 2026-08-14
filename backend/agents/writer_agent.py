@@ -86,8 +86,6 @@ and suitable for export as Markdown, PDF or DOCX.
             },
         ]
 
-        state.final_report = self.llm.chat(messages)
-
-        state.mark_task_complete("Writer")
+        state.set_final_report(self.llm.chat(messages))
 
         return state

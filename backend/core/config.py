@@ -1,81 +1,32 @@
-"""
-Configuration Loader Module
+"""Typed environment configuration."""
 
-This module handles loading and managing application configuration.
-It provides a centralized interface for accessing configuration values
-from environment variables using pydantic-settings for type-safe
-configuration management.
-"""
+from pathlib import Path
 
-from pydantic_settings import BaseSettings
 from pydantic import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 
 class Settings(BaseSettings):
-    """
-    Centralized configuration management for the application.
-    
-    This class loads configuration from environment variables and
-    provides type-safe access to configuration values using pydantic's
-    BaseSettings for automatic validation and type conversion.
-    
-    Configuration is automatically loaded from the .env file in the
-    project root directory.
-    """
-    APP_NAME: str = Field(
-        default="AutoResearchAI",
-        description="Application name"
-    )
+    model_config = SettingsConfigDict(env_file=PROJECT_ROOT / ".env", env_file_encoding="utf-8", extra="ignore")
 
-    APP_VERSION: str = Field(
-        default="0.1.0",
-        description="Current application version"
-    )
+    APP_NAME: str = "AutoResearchAI"
+    APP_VERSION: str = "0.2.0"
+    ENVIRONMENT: str = "development"
+    OPENROUTER_API_KEY: str = Field(..., min_length=1)
+    MODEL_NAME: str = "deepseek/deepseek-chat-v3-0324:free"
+    TEMPERATURE: float = Field(default=0.7, ge=0.0, le=2.0)
+    MAX_TOKENS: int = Field(default=4096, gt=0, le=16384)
+    LOG_LEVEL: str = "INFO"
+    DATABASE_PATH: str = str(PROJECT_ROOT / "database" / "autoresearch.sqlite3")
+    CORS_ORIGINS: str = "http://localhost:5173,http://127.0.0.1:5173"
+    LLM_TIMEOUT_SECONDS: float = Field(default=60, gt=0, le=300)
+    LLM_MAX_RETRIES: int = Field(default=2, ge=0, le=5)
 
-    ENVIRONMENT: str = Field(
-        default="development",
-        description="Application environment"
-    )
-
-    OPENROUTER_API_KEY: str = Field(
-        ...,
-        description="API key for OpenRouter service"
-    )
-    
-    MODEL_NAME: str = Field(
-        default="deepseek/deepseek-chat-v3-0324:free",
-        description="Default model used by the application"
-    )
-    
-    TEMPERATURE: float = Field(
-        default=0.7,
-        ge=0.0,
-        le=2.0,
-        description="Temperature setting for LLM generation"
-    )
-    
-    MAX_TOKENS: int = Field(
-        default=4096,
-        gt=0,
-        description="Maximum tokens for LLM responses"
-    )
-    
-    LOG_LEVEL: str = Field(
-        default="INFO",
-        description="Logging level for the application"
-    )
-    
-    class Config:
-        """
-        Pydantic configuration for settings.
-        
-        Configures the settings class to automatically load from
-        environment variables and the .env file.
-        """
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-        extra = "ignore"
+    @property
+    def cors_origins(self):
+        return [origin.strip() for origin in self.CORS_ORIGINS.split(",") if origin.strip()]
 
 
-# Singleton instance of settings
 settings = Settings()

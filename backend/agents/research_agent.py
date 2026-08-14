@@ -54,6 +54,6 @@ class ResearchAgent(BaseAgent):
             }
         ]
 
-        state.research = self.llm.chat(messages)
+        state.add_research_note(self.llm.chat(messages))
 
         return state

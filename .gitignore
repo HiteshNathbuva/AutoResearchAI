@@ -185,3 +185,6 @@ dist/
 
 # Environment
 frontend/.env
+
+# Local npm cache
+.npm-cache/
