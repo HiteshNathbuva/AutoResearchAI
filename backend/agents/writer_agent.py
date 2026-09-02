@@ -4,12 +4,68 @@ Writer Agent
 Responsible for generating the final user-facing report.
 """
 
+import re
+
 from backend.core.agent import BaseAgent
+from backend.core.exceptions import LLMError
 from backend.core.state import WorkflowState
 
 NO_VERIFICATION_CONTEXT = (
     "No verification was requested. Generate the report directly from the research."
 )
+
+# Patterns that indicate chain-of-thought or instruction leakage.
+# Used only as a defensive layer after fixing prompts.
+THINK_TAG_PATTERN = re.compile(r"<think>.*?</think>", re.IGNORECASE | re.DOTALL)
+LEAKAGE_MARKERS = [
+    "Here's a thinking process:",
+    "Here's my thinking process:",
+    "Thinking process:",
+    "Analyze User Input",
+    "Check Verification Status",
+    "I think the safest is",
+    "I'll use the 4 given",
+    "I'll use the given",
+]
+
+
+def _sanitize_report(text: str) -> str:
+    """Remove common chain-of-thought leakage patterns defensively.
+
+    This is a safety net; primary fix is prompt hardening.
+    """
+    if not text:
+        return text
+
+    # Strip <think>...</think> blocks that some reasoning models emit
+    cleaned = THINK_TAG_PATTERN.sub("", text)
+
+    # Remove lines that are exactly leakage markers or contain them as standalone
+    # reasoning headers. We keep the rest of the report intact.
+    lines = cleaned.splitlines()
+    filtered_lines = []
+    for line in lines:
+        stripped = line.strip()
+        # Skip lines that are known leakage markers
+        is_leakage = False
+        for marker in LEAKAGE_MARKERS:
+            if marker.lower() in stripped.lower() and len(stripped) < 200:
+                # If line is short and contains marker, likely leakage
+                # Check if line is mostly marker vs real content
+                if stripped.lower().startswith(marker.lower()[:10]) or marker.lower() in stripped.lower():
+                    # Heuristic: if line looks like "Analyze User Input" alone or with colon
+                    if len(stripped) < 100 or stripped.lower().startswith("here's a thinking"):
+                        is_leakage = True
+                        break
+        if not is_leakage:
+            filtered_lines.append(line)
+
+    cleaned = "\n".join(filtered_lines)
+
+    # Remove excessive blank lines introduced by stripping
+    cleaned = re.sub(r"\n{3,}", "\n\n", cleaned)
+
+    return cleaned.strip()
 
 
 class WriterAgent(BaseAgent):
@@ -44,42 +100,34 @@ class WriterAgent(BaseAgent):
 
         verification_context = state.verification or NO_VERIFICATION_CONTEXT
 
+        # Simplified user message to avoid triggering chain-of-thought.
+        # Explicitly instruct to output only final report, no thinking.
         messages = self.build_messages(
-            f"""User Query:
+            f"""User Query: {state.query}
 
-{state.query}
+Research Plan: {state.plan}
 
-Research Plan:
+Research Output: {state.research}
 
-{state.plan}
+Verification Result: {verification_context}
 
-Research Output:
+Task: Generate a professional report based on the research above. If verification recommends improvements, apply them silently. The report must be concise, professional, well-structured, easy to read, and suitable for export as Markdown, PDF or DOCX.
 
-{state.research}
-
-Verification Result:
-
-{verification_context}
-
-Instructions:
-
-- If the verification recommends improvements,
-  incorporate them before writing the report.
-
-- If the verification says the research is ready,
-  generate the report directly.
-
-- If no verification exists,
-  generate the report from the research output.
-
-The final report must be concise,
-professional,
-well-structured,
-easy to read,
-and suitable for export as Markdown, PDF or DOCX.
+Output ONLY the final report, no thinking process, no meta commentary, no internal instructions.
 """
         )
 
-        state.set_final_report(self.llm.chat(messages))
+        raw_report = self.llm.chat(messages)
+        cleaned_report = _sanitize_report(raw_report)
+        # Fail safely if sanitization removes everything - do not expose raw
+        # leakage. Empty cleaned report means the LLM output was entirely
+        # invalid/leaked content.
+        if not cleaned_report or not cleaned_report.strip():
+            raise LLMError(
+                "Report generation failed: sanitized report is empty. "
+                "The model returned only internal reasoning or invalid content."
+            )
+
+        state.set_final_report(cleaned_report.strip())
 
         return state

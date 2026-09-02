@@ -32,7 +32,16 @@ class Settings(BaseSettings):
 
     @property
     def cors_origins(self) -> List[str]:
-        return [origin.strip() for origin in self.CORS_ORIGINS.split(",") if origin.strip()]
+        origins = [origin.strip() for origin in self.CORS_ORIGINS.split(",") if origin.strip()]
+        # Allow wildcard to mean all origins when explicitly configured.
+        # In production this should not be used, but we still parse it.
+        if "*" in origins:
+            return ["*"]
+        return origins
+
+    @property
+    def is_production(self) -> bool:
+        return self.ENVIRONMENT.lower() == "production"
 
 
 @lru_cache(maxsize=1)
