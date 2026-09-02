@@ -14,7 +14,6 @@ from backend.core.config import Settings
 from backend.core.exceptions import LLMError
 from backend.core.state import WorkflowState
 
-
 # ----------------------------------------------------------------------
 # CORS / connectivity regression
 # ----------------------------------------------------------------------
@@ -51,13 +50,14 @@ def test_cors_specific_origins_still_work():
 
 def test_cors_explicit_wildcard_allows_all_in_non_production():
     """When wildcard is explicitly set in non-production, it should allow any origin."""
+    import tempfile
+    from pathlib import Path
+
     from fastapi.testclient import TestClient
 
     from backend.core.container import build_resources
     from backend.main import create_app
     from tests.conftest import FakeLLMClient
-    import tempfile
-    from pathlib import Path
 
     tmp = Path(tempfile.mkdtemp()) / "test_cors.db"
     settings = Settings(
@@ -147,7 +147,10 @@ def test_sanitize_removes_think_tags():
 
 
 def test_sanitize_removes_think_tags_multiline():
-    raw = "# Title\n<think>\nHere's a thinking process:\nAnalyze User Input\nCheck Verification Status\n</think>\n\n# Executive Summary\nReal content"
+    raw = (
+        "# Title\n<think>\nHere's a thinking process:\nAnalyze User Input\n"
+        "Check Verification Status\n</think>\n\n# Executive Summary\nReal content"
+    )
     cleaned = _sanitize_report(raw)
     assert "<think>" not in cleaned.lower()
     assert "Here's a thinking process" not in cleaned
@@ -250,7 +253,11 @@ def test_researcher_prompt_hardened():
     from backend.utils.prompt_loader import load_prompt
 
     prompt = load_prompt("researcher.md").lower()
-    assert "never output your thinking process" in prompt or "chain-of-thought" in prompt or "thinking process" in prompt
+    assert (
+        "never output your thinking process" in prompt
+        or "chain-of-thought" in prompt
+        or "thinking process" in prompt
+    )
 
 
 # ----------------------------------------------------------------------

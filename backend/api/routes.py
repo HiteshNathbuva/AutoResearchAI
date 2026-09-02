@@ -30,6 +30,7 @@ def _response(session_id: str, state: WorkflowState,
                          reading_time=data["reading_time"], research=data["research"], plan=data["plan"],
                          verification=data["verification"], report=data["final_report"],
                          completed_tasks=data["completed_tasks"], current_step=data["current_step"],
+                         sources=data.get("sources", []), diagnostics=data.get("diagnostics", {}),
                          created_at=data["created_at"], updated_at=data["updated_at"])
 
 

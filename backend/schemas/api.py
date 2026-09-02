@@ -1,6 +1,6 @@
 """Pydantic schemas exposed by the REST API."""
 
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field
 
@@ -20,6 +20,10 @@ class SessionResponse(BaseModel):
     report: str = ""
     completed_tasks: List[str] = []
     current_step: str = ""
+    # Phase 2: additive source/diagnostic fields. These default to empty so
+    # responses remain understandable to (and compatible with) older clients.
+    sources: List[Dict[str, Any]] = []
+    diagnostics: Dict[str, Any] = {}
     created_at: str = ""
     updated_at: str = ""
 

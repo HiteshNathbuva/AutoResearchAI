@@ -34,6 +34,9 @@ The project follows modern AI engineering practices including modular architectu
 - 🔍 Research Agent
 - ✅ Verifier Agent
 - 📝 Writer Agent
+- 🌐 Real Web Research (search + safe fetching + source tracking)
+- 🛡️ SSRF-protected web fetching
+- 📑 Source tracking & citations
 - ⚡ FastAPI Backend
 - 🌐 REST API
 - 🔄 Session-Based Workflow
@@ -203,6 +206,41 @@ Create a `.env` file in the project root.
 ```env
 OPENROUTER_API_KEY=your_api_key_here
 ```
+
+### Optional: Real Web Research (Phase 2)
+
+Web research is off by default. To enable it, set the following (all optional —
+the app boots fine without them, and gracefully falls back to LLM-only research
+if web tools are disabled or fail):
+
+```env
+# Enable real web research (default: false)
+WEB_RESEARCH_ENABLED=true
+
+# Search provider: auto | tavily | none (default: auto)
+SEARCH_PROVIDER=auto
+
+# Optional Tavily API key. Never commit a real key. When absent and search is
+# enabled, the system degrades gracefully to LLM-only research.
+TAVILY_API_KEY=your_tavily_key_here
+
+# Bounded resource limits (safe defaults shown)
+SEARCH_MAX_RESULTS=5
+SEARCH_TIMEOUT_SECONDS=10
+SEARCH_MAX_RETRIES=2
+MAX_FETCHED_SOURCES=5
+FETCH_TIMEOUT_SECONDS=10
+FETCH_MAX_REDIRECTS=3
+FETCH_MAX_BYTES=2000000
+EXTRACT_MAX_CHARS=8000
+```
+
+**Security restrictions:** fetched URLs and every redirect are validated
+against an SSRF blocklist *before* any connection. Only HTTP/HTTPS is allowed;
+localhost, loopback, private/link-local/reserved networks, CGNAT, cloud-metadata
+addresses, and common encoded-IP bypasses are rejected. Response size, redirect
+count, and extracted text are all bounded, and fetched page content is treated as
+untrusted data (never as instructions) in every prompt.
 
 ---
 
