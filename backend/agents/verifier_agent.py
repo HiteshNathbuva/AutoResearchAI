@@ -10,7 +10,7 @@ missing information, and overall research quality.
 """
 
 from backend.core.agent import BaseAgent
-from backend.utils.prompt_loader import load_prompt
+from backend.core.state import WorkflowState
 
 
 class VerifierAgent(BaseAgent):
@@ -18,40 +18,45 @@ class VerifierAgent(BaseAgent):
     AI agent responsible for verifying research quality.
     """
 
-    def __init__(self):
+    prompt_file = "verifier.md"
+
+    def __init__(self, llm):
         super().__init__(
+            llm=llm,
             name="Verifier Agent",
-            role="Research Verifier"
+            role="Research Verifier",
         )
 
-    def execute(self, state):
+    def execute(self, state: WorkflowState) -> WorkflowState:
         """
         Verify research output.
 
         Args:
-            input_data (str):
-                Research content to verify.
+            state: Shared workflow state carrying the research output.
 
         Returns:
-            str:
-                Verification report.
+            WorkflowState: State updated with the verification report.
         """
 
-        if not self.validate(state):
-            raise ValueError("Input data cannot be empty.")
+        self.require_valid(state)
 
-        system_prompt = load_prompt("verifier.md")
+        if not state.research:
+            raise ValueError("Research must be completed before verification.")
 
-        messages = [
-            {
-                "role": "system",
-                "content": system_prompt,
-            },
-            {
-                "role": "user",
-                "content": state.research,
-                }
-        ]
+        messages = self.build_messages(
+            f"""User Query:
+
+{state.query}
+
+Research Plan:
+
+{state.plan}
+
+Research Output:
+
+{state.research}
+"""
+        )
 
         state.update_verification(self.llm.chat(messages))
 

@@ -6,7 +6,7 @@ a structured research plan.
 """
 
 from backend.core.agent import BaseAgent
-from backend.utils.prompt_loader import load_prompt
+from backend.core.state import WorkflowState
 
 
 class PlannerAgent(BaseAgent):
@@ -14,37 +14,30 @@ class PlannerAgent(BaseAgent):
     AI agent responsible for planning research tasks.
     """
 
-    def __init__(self):
+    prompt_file = "planner.md"
+
+    def __init__(self, llm):
         super().__init__(
+            llm=llm,
             name="Planner Agent",
-            role="Research Planner"
+            role="Research Planner",
         )
 
-    def execute(self, input_data):
+    def execute(self, state: WorkflowState) -> WorkflowState:
         """
         Generate a research plan.
 
         Args:
-            input_data (str): User research query.
+            state: Shared workflow state carrying the user query.
 
         Returns:
-            str: Structured research plan.
+            WorkflowState: State updated with the structured research plan.
         """
 
-        if not self.validate(input_data):
-            raise ValueError("Input data cannot be empty.")
+        self.require_valid(state)
 
-        system_prompt = load_prompt("planner.md")
+        messages = self.build_messages(state.query)
 
-        messages = [
-            {
-                "role": "system",
-                "content": system_prompt,
-            },
-            {
-                "role": "user",
-                "content": input_data,
-            },
-        ]
+        state.update_plan(self.llm.chat(messages))
 
-        return self.llm.chat(messages)
+        return state

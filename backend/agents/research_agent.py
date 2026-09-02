@@ -5,7 +5,7 @@ Responsible for answering research queries using the configured LLM.
 """
 
 from backend.core.agent import BaseAgent
-from backend.utils.prompt_loader import load_prompt
+from backend.core.state import WorkflowState
 
 
 class ResearchAgent(BaseAgent):
@@ -13,46 +13,38 @@ class ResearchAgent(BaseAgent):
     AI agent responsible for performing research tasks.
     """
 
-    def __init__(self):
+    prompt_file = "researcher.md"
+
+    def __init__(self, llm):
         super().__init__(
+            llm=llm,
             name="Research Agent",
-            role="Research Specialist"
+            role="Research Specialist",
         )
 
-    def execute(self, state):
+    def execute(self, state: WorkflowState) -> WorkflowState:
         """
         Execute a research request.
 
         Args:
-            input_data (str): Research question.
+            state: Shared workflow state carrying the query and research plan.
 
         Returns:
-            str: LLM response.
+            WorkflowState: State updated with the research output.
         """
 
-        if not self.validate(state):
-            raise ValueError("Input data cannot be empty.")
+        self.require_valid(state)
 
-        system_prompt = load_prompt("researcher.md")
+        messages = self.build_messages(
+            f"""User Query:
 
-        messages = [
-            {
-                "role": "system",
-                "content": system_prompt,
-            },
-            {
-                "role": "user",
-                "content": f"""
-            User Query:
+{state.query}
 
-            {state.query}
+Research Plan:
 
-            Research Plan:
-
-            {state.plan}
-            """
-            }
-        ]
+{state.plan}
+"""
+        )
 
         state.add_research_note(self.llm.chat(messages))
 
