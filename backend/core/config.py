@@ -26,13 +26,22 @@ class Settings(BaseSettings):
     MAX_TOKENS: int = Field(default=4096, gt=0, le=16384)
     LOG_LEVEL: str = "INFO"
     DATABASE_PATH: str = str(PROJECT_ROOT / "database" / "autoresearch.sqlite3")
-    CORS_ORIGINS: str = "http://localhost:5173,http://127.0.0.1:5173"
+    CORS_ORIGINS: str = "*"
     LLM_TIMEOUT_SECONDS: float = Field(default=60, gt=0, le=300)
     LLM_MAX_RETRIES: int = Field(default=2, ge=0, le=5)
 
     @property
     def cors_origins(self) -> List[str]:
-        return [origin.strip() for origin in self.CORS_ORIGINS.split(",") if origin.strip()]
+        origins = [origin.strip() for origin in self.CORS_ORIGINS.split(",") if origin.strip()]
+        # Allow wildcard to mean all origins. When "*" is present, FastAPI's
+        # CORSMiddleware with allow_credentials=False will allow any origin.
+        if "*" in origins:
+            return ["*"]
+        return origins
+
+    @property
+    def is_production(self) -> bool:
+        return self.ENVIRONMENT.lower() == "production"
 
 
 @lru_cache(maxsize=1)

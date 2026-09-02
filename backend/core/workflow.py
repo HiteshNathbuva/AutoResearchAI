@@ -75,6 +75,12 @@ class WorkflowOrchestrator:
         state.mark_task_complete("Writer")
 
         state.update_status("Report generated")
+        # If verification exists, preserve its confidence; otherwise mark as Unverified.
+        # This ensures status and confidence are consistent.
+        if state.verification:
+            state.set_confidence(self._confidence_from_verification(state.verification))
+        else:
+            state.set_confidence("Unverified")
         state.set_reading_time(self._reading_time(state.final_report))
         return state
 

@@ -44,7 +44,19 @@ def create_app(settings: Optional[Settings] = None,
 
     app = FastAPI(title=settings.APP_NAME, version=settings.APP_VERSION,
                   description="Multi-agent research platform", lifespan=lifespan)
-    app.add_middleware(CORSMiddleware, allow_origins=settings.cors_origins,
+    # In non-production, allow all origins to support preview hosts (e.g.
+    # https://{port}-{sandboxId}.e2b.app) and avoid "Failed to fetch" CORS
+    # issues. In production, respect the configured CORS_ORIGINS.
+    if getattr(settings, "is_production", False):
+        allowed_origins = settings.cors_origins
+    else:
+        # Development/test: if configured origins is wildcard or empty, allow all;
+        # otherwise allow configured + wildcard fallback for preview environments.
+        allowed_origins = settings.cors_origins if settings.cors_origins != ["*"] else ["*"]
+        if allowed_origins != ["*"]:
+            # Always allow any origin in dev to prevent CORS-related fetch failures
+            allowed_origins = ["*"]
+    app.add_middleware(CORSMiddleware, allow_origins=allowed_origins,
                        allow_credentials=False, allow_methods=["*"], allow_headers=["*"])
     app.include_router(router)
 
