@@ -26,15 +26,15 @@ class Settings(BaseSettings):
     MAX_TOKENS: int = Field(default=4096, gt=0, le=16384)
     LOG_LEVEL: str = "INFO"
     DATABASE_PATH: str = str(PROJECT_ROOT / "database" / "autoresearch.sqlite3")
-    CORS_ORIGINS: str = "*"
+    CORS_ORIGINS: str = "http://localhost:5173,http://127.0.0.1:5173"
     LLM_TIMEOUT_SECONDS: float = Field(default=60, gt=0, le=300)
     LLM_MAX_RETRIES: int = Field(default=2, ge=0, le=5)
 
     @property
     def cors_origins(self) -> List[str]:
         origins = [origin.strip() for origin in self.CORS_ORIGINS.split(",") if origin.strip()]
-        # Allow wildcard to mean all origins. When "*" is present, FastAPI's
-        # CORSMiddleware with allow_credentials=False will allow any origin.
+        # Allow wildcard to mean all origins when explicitly configured.
+        # In production this should not be used, but we still parse it.
         if "*" in origins:
             return ["*"]
         return origins

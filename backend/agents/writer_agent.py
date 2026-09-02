@@ -7,6 +7,7 @@ Responsible for generating the final user-facing report.
 import re
 
 from backend.core.agent import BaseAgent
+from backend.core.exceptions import LLMError
 from backend.core.state import WorkflowState
 
 NO_VERIFICATION_CONTEXT = (
@@ -118,9 +119,15 @@ Output ONLY the final report, no thinking process, no meta commentary, no intern
 
         raw_report = self.llm.chat(messages)
         cleaned_report = _sanitize_report(raw_report)
-        # Ensure we never return empty after sanitization; fallback to raw if over-filtered
-        final_report = cleaned_report if cleaned_report.strip() else raw_report.strip()
+        # Fail safely if sanitization removes everything - do not expose raw
+        # leakage. Empty cleaned report means the LLM output was entirely
+        # invalid/leaked content.
+        if not cleaned_report or not cleaned_report.strip():
+            raise LLMError(
+                "Report generation failed: sanitized report is empty. "
+                "The model returned only internal reasoning or invalid content."
+            )
 
-        state.set_final_report(final_report)
+        state.set_final_report(cleaned_report.strip())
 
         return state

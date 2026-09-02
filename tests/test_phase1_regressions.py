@@ -11,6 +11,7 @@ import pytest
 
 from backend.agents.writer_agent import _sanitize_report
 from backend.core.config import Settings
+from backend.core.exceptions import LLMError
 from backend.core.state import WorkflowState
 
 
@@ -18,8 +19,17 @@ from backend.core.state import WorkflowState
 # CORS / connectivity regression
 # ----------------------------------------------------------------------
 
-def test_cors_default_allows_all_origins():
-    """Default CORS_ORIGINS should be wildcard to avoid Failed to fetch in preview."""
+def test_cors_default_is_restricted():
+    """Safe restricted default should be used, not wildcard."""
+    settings = Settings(OPENROUTER_API_KEY="test-key", _env_file=None)
+    # Default should be restricted localhost origins, not "*"
+    assert settings.cors_origins != ["*"]
+    assert "http://localhost:5173" in settings.cors_origins
+    assert "http://127.0.0.1:5173" in settings.cors_origins
+
+
+def test_cors_wildcard_allowed_when_explicitly_set():
+    """Wildcard should be allowed only when explicitly configured."""
     settings = Settings(OPENROUTER_API_KEY="test-key", _env_file=None, CORS_ORIGINS="*")
     assert settings.cors_origins == ["*"]
 
@@ -39,14 +49,46 @@ def test_cors_specific_origins_still_work():
     assert settings.cors_origins == ["http://localhost:5173", "http://127.0.0.1:5173"]
 
 
-def test_cors_allows_all_in_non_production(client):
-    """Ensure test client gets CORS header (either * or specific)."""
-    response = client.get("/api/health", headers={"Origin": "https://preview.example.com"})
-    assert response.headers.get("access-control-allow-origin") in (
-        "*",
-        "https://preview.example.com",
-        "http://localhost:5173",
+def test_cors_explicit_wildcard_allows_all_in_non_production():
+    """When wildcard is explicitly set in non-production, it should allow any origin."""
+    from fastapi.testclient import TestClient
+
+    from backend.core.container import build_resources
+    from backend.main import create_app
+    from tests.conftest import FakeLLMClient
+    import tempfile
+    from pathlib import Path
+
+    tmp = Path(tempfile.mkdtemp()) / "test_cors.db"
+    settings = Settings(
+        OPENROUTER_API_KEY="test-key",
+        ENVIRONMENT="development",
+        LOG_LEVEL="WARNING",
+        DATABASE_PATH=str(tmp),
+        CORS_ORIGINS="*",
+        _env_file=None,
     )
+    from backend.core.session import SessionManager
+
+    session_manager = SessionManager(str(tmp))
+    fake_llm = FakeLLMClient()
+    resources = build_resources(settings=settings, llm_client=fake_llm, session_manager=session_manager)
+    app = create_app(settings=settings, resources=resources)
+    with TestClient(app) as client:
+        response = client.get("/api/health", headers={"Origin": "https://preview.example.com"})
+        assert response.headers.get("access-control-allow-origin") == "*"
+
+
+def test_cors_restricted_default_blocks_unknown_origin(client):
+    """With safe default, unknown preview origin should not be allowed (no wildcard)."""
+    response = client.get("/api/health", headers={"Origin": "https://preview.example.com"})
+    allowed = response.headers.get("access-control-allow-origin")
+    # With restricted default, preview origin should NOT be allowed
+    # It should either be missing or be one of the allowed localhost origins
+    # But not the preview origin itself and not "*"
+    assert allowed != "https://preview.example.com"
+    # Could be localhost or None depending on CORSMiddleware behavior
+    # The important part is we don't accidentally allow all
 
 
 # ----------------------------------------------------------------------
@@ -129,7 +171,6 @@ def test_sanitize_preserves_valid_report():
 
 def test_sanitize_handles_empty():
     assert _sanitize_report("") == ""
-    # None handling - function returns None or empty; we accept empty string case
     assert _sanitize_report("") == ""
 
 
@@ -168,6 +209,32 @@ def test_writer_agent_sanitizes_output():
     assert "Analyze User Input" not in report
     assert "Check Verification Status" not in report
     assert "Test Title" in report or "clean report" in report.lower()
+
+
+def test_writer_agent_fails_safely_when_entirely_leaked():
+    """If sanitization removes everything, writer should fail safely, not expose raw."""
+    from backend.agents.writer_agent import WriterAgent
+
+    # Response that is entirely leakage - after sanitization should be empty
+    entirely_leaked = (
+        "<think>internal reasoning</think>\n"
+        "Here's a thinking process:\n"
+        "Analyze User Input\n"
+        "Check Verification Status\n"
+    )
+
+    class LeakedLLM:
+        def chat(self, messages, model=None):
+            return entirely_leaked
+
+    state = WorkflowState()
+    state.update_query("test query")
+    state.update_plan("plan")
+    state.add_research_note("research")
+
+    agent = WriterAgent(LeakedLLM())
+    with pytest.raises(LLMError, match="sanitized report is empty"):
+        agent.execute(state)
 
 
 def test_writer_prompt_contains_anti_leakage_rules():
