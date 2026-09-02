@@ -22,7 +22,8 @@ CREATE_TABLE_SQL = """CREATE TABLE IF NOT EXISTS research_sessions (
     final_report TEXT NOT NULL DEFAULT '', status TEXT NOT NULL, confidence TEXT,
     reading_time INTEGER, current_step TEXT NOT NULL,
     completed_tasks TEXT NOT NULL DEFAULT '[]', created_at TEXT NOT NULL,
-    updated_at TEXT NOT NULL)"""
+    updated_at TEXT NOT NULL, sources TEXT NOT NULL DEFAULT '[]',
+    diagnostics TEXT NOT NULL DEFAULT '{}')"""
 
 CREATE_INDEX_SQL = (
     "CREATE INDEX IF NOT EXISTS idx_research_sessions_updated_at "
@@ -59,6 +60,28 @@ class SessionManager:
         with self._lock, self._connection() as connection:
             connection.execute(CREATE_TABLE_SQL)
             connection.execute(CREATE_INDEX_SQL)
+            self._migrate(connection)
+
+    def _migrate(self, connection: sqlite3.Connection) -> None:
+        """Idempotently add Phase 2 columns to existing databases.
+
+        ``CREATE TABLE IF NOT EXISTS`` never alters an existing table, so
+        databases created before Phase 2 need the new columns added here. The
+        migration is safe to run repeatedly and leaves pre-existing rows (and
+        the whole schema) untouched.
+        """
+
+        existing_columns = {
+            row[1] for row in connection.execute("PRAGMA table_info(research_sessions)")
+        }
+        if "sources" not in existing_columns:
+            connection.execute(
+                "ALTER TABLE research_sessions ADD COLUMN sources TEXT NOT NULL DEFAULT '[]'"
+            )
+        if "diagnostics" not in existing_columns:
+            connection.execute(
+                "ALTER TABLE research_sessions ADD COLUMN diagnostics TEXT NOT NULL DEFAULT '{}'"
+            )
 
     @staticmethod
     def _state_values(session_id: str, state: WorkflowState):
@@ -66,7 +89,9 @@ class SessionManager:
         return (session_id, data["query"], data["plan"], data["research"],
                 data["verification"], data["final_report"], data["status"],
                 data["confidence"], data["reading_time"], data["current_step"],
-                json.dumps(data["completed_tasks"]), data["created_at"], data["updated_at"])
+                json.dumps(data["completed_tasks"]),
+                json.dumps(data["sources"]), json.dumps(data["diagnostics"]),
+                data["created_at"], data["updated_at"])
 
     @staticmethod
     def _row_to_state(row: sqlite3.Row) -> WorkflowState:
@@ -76,6 +101,8 @@ class SessionManager:
             "status": row["status"], "confidence": row["confidence"],
             "reading_time": row["reading_time"], "current_step": row["current_step"],
             "completed_tasks": json.loads(row["completed_tasks"]),
+            "sources": json.loads(row["sources"]) if row["sources"] else [],
+            "diagnostics": json.loads(row["diagnostics"]) if row["diagnostics"] else {},
             "created_at": row["created_at"], "updated_at": row["updated_at"]})
 
     def create_session(self, state: WorkflowState) -> str:
@@ -83,8 +110,9 @@ class SessionManager:
         with self._lock, self._connection() as connection:
             connection.execute("""INSERT INTO research_sessions
                 (id, query, plan, research, verification, final_report, status, confidence,
-                 reading_time, current_step, completed_tasks, created_at, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                 reading_time, current_step, completed_tasks, sources, diagnostics,
+                 created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 self._state_values(session_id, state))
         return session_id
 
@@ -100,9 +128,10 @@ class SessionManager:
         values = self._state_values(session_id, state)
         with self._lock, self._connection() as connection:
             cursor = connection.execute("""UPDATE research_sessions SET query=?, plan=?, research=?,
-                verification=?, final_report=?, status=?, confidence=?, reading_time=?, current_step=?,
-                completed_tasks=?, updated_at=? WHERE id=?""",
-                (*values[1:11], values[12], session_id))
+                verification=?, final_report=?, status=?, confidence=?, reading_time=?,
+                current_step=?, completed_tasks=?, sources=?, diagnostics=?, updated_at=?,
+                created_at=? WHERE id=?""",
+                (*values[1:11], values[11], values[12], values[14], values[13], session_id))
         if cursor.rowcount == 0:
             raise KeyError(session_id)
 

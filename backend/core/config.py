@@ -6,7 +6,7 @@ backend module never validates the environment or touches the filesystem.
 
 from functools import lru_cache
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -30,6 +30,30 @@ class Settings(BaseSettings):
     LLM_TIMEOUT_SECONDS: float = Field(default=60, gt=0, le=300)
     LLM_MAX_RETRIES: int = Field(default=2, ge=0, le=5)
 
+    # ------------------------------------------------------------------
+    # Phase 2: optional real web research configuration.
+    # All of these are additive and have safe defaults. The application
+    # boots with the existing required configuration; web research is
+    # disabled unless ``WEB_RESEARCH_ENABLED`` and (for Tavily) a key are
+    # present. No secret is required for the application to start.
+    # ------------------------------------------------------------------
+    WEB_RESEARCH_ENABLED: bool = False
+    #: ``auto`` (Tavily when a key exists, otherwise keyless/disabled),
+    #: ``tavily`` (require a key), or ``none`` (explicitly disabled).
+    SEARCH_PROVIDER: str = "auto"
+    # Optional so the app boots without any Tavily key. The empty string is
+    # treated as "not configured" by :meth:`effective_search_provider`.
+    TAVILY_API_KEY: Optional[str] = None
+    SEARCH_MAX_RESULTS: int = Field(default=5, ge=1, le=20)
+    SEARCH_TIMEOUT_SECONDS: float = Field(default=10, gt=0, le=120)
+    SEARCH_MAX_RETRIES: int = Field(default=2, ge=0, le=5)
+    MAX_FETCHED_SOURCES: int = Field(default=5, ge=1, le=20)
+    FETCH_TIMEOUT_SECONDS: float = Field(default=10, gt=0, le=120)
+    FETCH_MAX_REDIRECTS: int = Field(default=3, ge=0, le=10)
+    FETCH_MAX_BYTES: int = Field(default=2_000_000, ge=1_024, le=20_000_000)
+    EXTRACT_MAX_CHARS: int = Field(default=8_000, ge=256, le=100_000)
+    WEB_RESEARCH_EVIDENCE_MAX_CHARS: int = Field(default=20_000, ge=1_000, le=200_000)
+
     @property
     def cors_origins(self) -> List[str]:
         origins = [origin.strip() for origin in self.CORS_ORIGINS.split(",") if origin.strip()]
@@ -42,6 +66,19 @@ class Settings(BaseSettings):
     @property
     def is_production(self) -> bool:
         return self.ENVIRONMENT.lower() == "production"
+
+    @property
+    def effective_search_provider(self) -> str:
+        """Normalize :attr:`SEARCH_PROVIDER` into ``tavily`` or ``none``.
+
+        ``auto`` selects Tavily when a key is configured and falls back to a
+        keyless disabled provider otherwise. Unknown values map to ``none``.
+        """
+
+        mode = (self.SEARCH_PROVIDER or "").strip().lower()
+        if mode in ("auto", "tavily"):
+            return "tavily" if self.TAVILY_API_KEY else "none"
+        return "none"
 
 
 @lru_cache(maxsize=1)

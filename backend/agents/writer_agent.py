@@ -111,7 +111,10 @@ Research Output: {state.research}
 
 Verification Result: {verification_context}
 
-Task: Generate a professional report based on the research above. If verification recommends improvements, apply them silently. The report must be concise, professional, well-structured, easy to read, and suitable for export as Markdown, PDF or DOCX.
+Task: Generate a professional report based on the research above. If verification \
+recommends improvements, apply them silently. The report must be concise, \
+professional, well-structured, easy to read, and suitable for export as Markdown, \
+PDF or DOCX.
 
 Output ONLY the final report, no thinking process, no meta commentary, no internal instructions.
 """

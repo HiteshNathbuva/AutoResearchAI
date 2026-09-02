@@ -23,6 +23,9 @@ class WorkflowState:
         self.memory: Dict[str, Any] = {}
         self.completed_tasks: List[str] = []
         self.current_step = "Initialized"
+        # Phase 2: real web research artifacts.
+        self.sources: List[Dict[str, Any]] = []
+        self.diagnostics: Dict[str, Any] = {}
         timestamp = _now()
         self.metadata = {"created_at": timestamp, "updated_at": timestamp}
 
@@ -79,6 +82,30 @@ class WorkflowState:
         self.reading_time = max(1, minutes)
         self._update_timestamp()
 
+    def set_sources(self, sources: List[Dict[str, Any]]) -> None:
+        """Store the list of consulted web sources (additive, backward-safe)."""
+
+        self.sources = list(sources or [])
+        self._update_timestamp()
+
+    def set_diagnostics(self, diagnostics: Dict[str, Any]) -> None:
+        """Store web-research diagnostics (additive, backward-safe)."""
+
+        self.diagnostics = dict(diagnostics or {})
+        self._update_timestamp()
+
+    def add_source(self, source: Dict[str, Any]) -> None:
+        """Append a single source, de-duplicating by URL (additive)."""
+
+        if not source:
+            return
+        url = (source.get("url") or "").strip()
+        for existing in self.sources:
+            if (existing.get("url") or "").strip() == url:
+                return
+        self.sources.append(dict(source))
+        self._update_timestamp()
+
     def mark_task_complete(self, task_name: str) -> None:
         if task_name not in self.completed_tasks:
             self.completed_tasks.append(task_name)
@@ -91,6 +118,7 @@ class WorkflowState:
                 "status": self.status, "confidence": self.confidence,
                 "reading_time": self.reading_time, "current_step": self.current_step,
                 "completed_tasks": list(self.completed_tasks),
+                "sources": list(self.sources), "diagnostics": dict(self.diagnostics),
                 "created_at": self.metadata["created_at"], "updated_at": self.metadata["updated_at"]}
 
     @classmethod
@@ -105,6 +133,8 @@ class WorkflowState:
         state.reading_time = data.get("reading_time") or 0
         state.current_step = data.get("current_step") or "Initialized"
         state.completed_tasks = list(data.get("completed_tasks") or [])
+        state.sources = list(data.get("sources") or [])
+        state.diagnostics = dict(data.get("diagnostics") or {})
         state.metadata = {"created_at": data.get("created_at") or _now(),
                           "updated_at": data.get("updated_at") or _now()}
         return state
