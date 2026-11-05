@@ -3,9 +3,17 @@
 from datetime import datetime, timezone
 from typing import Any, Dict, List
 
+from backend.core.statuses import FAILED
+
 
 def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
+
+
+#: Upper bound on an error message persisted to the database. Error text is
+#: user-safe (it never contains secrets), but bounding it keeps the column
+#: predictable even if a dependency produces a very long message.
+MAX_ERROR_CHARS = 1000
 
 
 class WorkflowState:
@@ -23,6 +31,8 @@ class WorkflowState:
         self.memory: Dict[str, Any] = {}
         self.completed_tasks: List[str] = []
         self.current_step = "Initialized"
+        # Safe, user-visible error detail when the run ends in a Failed state.
+        self.error = ""
         # Phase 2: real web research artifacts.
         self.sources: List[Dict[str, Any]] = []
         self.diagnostics: Dict[str, Any] = {}
@@ -74,6 +84,21 @@ class WorkflowState:
         self.status = status
         self._update_timestamp()
 
+    def mark_failed(self, error: str) -> None:
+        """Record a terminal failure with a safe, bounded error message."""
+
+        message = (error or "The research workflow failed.").strip() or "The research workflow failed."
+        self.error = message[:MAX_ERROR_CHARS]
+        self.status = FAILED
+        self.current_step = FAILED
+        self._update_timestamp()
+
+    def clear_error(self) -> None:
+        """Clear any recorded error (e.g. when retrying a failed run)."""
+
+        self.error = ""
+        self._update_timestamp()
+
     def set_confidence(self, confidence: str) -> None:
         self.confidence = confidence
         self._update_timestamp()
@@ -117,7 +142,7 @@ class WorkflowState:
                 "verification": self.verification, "final_report": self.final_report,
                 "status": self.status, "confidence": self.confidence,
                 "reading_time": self.reading_time, "current_step": self.current_step,
-                "completed_tasks": list(self.completed_tasks),
+                "completed_tasks": list(self.completed_tasks), "error": self.error,
                 "sources": list(self.sources), "diagnostics": dict(self.diagnostics),
                 "created_at": self.metadata["created_at"], "updated_at": self.metadata["updated_at"]}
 
@@ -133,6 +158,7 @@ class WorkflowState:
         state.reading_time = data.get("reading_time") or 0
         state.current_step = data.get("current_step") or "Initialized"
         state.completed_tasks = list(data.get("completed_tasks") or [])
+        state.error = data.get("error") or ""
         state.sources = list(data.get("sources") or [])
         state.diagnostics = dict(data.get("diagnostics") or {})
         state.metadata = {"created_at": data.get("created_at") or _now(),

@@ -11,6 +11,7 @@ class ResearchRequest(BaseModel):
 
 class SessionResponse(BaseModel):
     session_id: str
+    query: str = ""
     status: str
     confidence: str
     reading_time: int
@@ -20,6 +21,8 @@ class SessionResponse(BaseModel):
     report: str = ""
     completed_tasks: List[str] = []
     current_step: str = ""
+    # Safe, user-visible failure detail (empty when the run has not failed).
+    error: str = ""
     # Phase 2: additive source/diagnostic fields. These default to empty so
     # responses remain understandable to (and compatible with) older clients.
     sources: List[Dict[str, Any]] = []
@@ -38,6 +41,22 @@ class VerificationResponse(SessionResponse):
 
 class ReportResponse(SessionResponse):
     pass
+
+
+class JobAcceptedResponse(BaseModel):
+    """Returned with HTTP 202 when a background job is accepted."""
+
+    session_id: str
+    status: str
+    job_active: bool = True
+    poll_url: str
+    poll_interval_seconds: float = 1.5
+
+
+class JobStatusResponse(SessionResponse):
+    """Session payload plus whether a background job is still running."""
+
+    job_active: bool = False
 
 
 class SessionSummary(BaseModel):

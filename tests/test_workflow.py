@@ -113,3 +113,35 @@ def test_confidence_flows_from_verification_text(fake_llm, researched_state):
     state = build_workflow(fake_llm).verify_report(researched_state)
 
     assert state.confidence == "Low"
+
+
+def test_execute_pipeline_emits_progress_checkpoints(workflow):
+    seen = []
+
+    state = workflow.execute_pipeline("explain ai agents", on_update=lambda s: seen.append(s.status))
+
+    # The callback fires for Planning, Researching and the terminal status at
+    # minimum, which is what powers live progress and persisted checkpoints.
+    assert "Planning" in seen
+    assert "Researching" in seen
+    assert state.status == "Research completed"
+    assert seen[-1] == "Research completed"
+
+
+def test_verify_report_emits_progress_checkpoints(workflow, researched_state):
+    seen = []
+
+    workflow.verify_report(researched_state, on_update=lambda s: seen.append(s.status))
+
+    assert "Verifying" in seen
+    assert "Writing verified report" in seen
+    assert seen[-1] == "Verified report generated"
+
+
+def test_generate_report_emits_progress_checkpoints(workflow, researched_state):
+    seen = []
+
+    workflow.generate_report(researched_state, on_update=lambda s: seen.append(s.status))
+
+    assert "Writing report" in seen
+    assert seen[-1] == "Report generated"

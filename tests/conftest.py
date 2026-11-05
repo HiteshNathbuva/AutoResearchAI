@@ -74,11 +74,15 @@ def fake_llm() -> FakeLLMClient:
 
 @pytest.fixture
 def test_settings(tmp_path: Path) -> Settings:
-    """Settings pointed at a temporary database."""
+    """Settings pointed at a temporary database and no frontend build."""
 
     return Settings(OPENROUTER_API_KEY="test-key-not-a-real-secret",
                     ENVIRONMENT="test", LOG_LEVEL="WARNING",
-                    DATABASE_PATH=str(tmp_path / "test.sqlite3"))
+                    DATABASE_PATH=str(tmp_path / "test.sqlite3"),
+                    # Keep tests hermetic: never serve a SPA that happens to
+                    # exist in the working tree unless a test opts in.
+                    FRONTEND_DIST_DIR=str(tmp_path / "no-frontend-dist"),
+                    _env_file=None)
 
 
 @pytest.fixture

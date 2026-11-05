@@ -110,3 +110,46 @@ def test_to_dict_returns_a_copy_of_completed_tasks():
     data = state.to_dict()
     data["completed_tasks"].append("Mutated")
     assert state.completed_tasks == ["Planner"]
+
+
+def test_mark_failed_records_status_and_bounded_error():
+    from backend.core.statuses import FAILED
+
+    state = WorkflowState()
+    state.update_query("topic")
+    state.mark_failed("something went wrong")
+
+    assert state.status == FAILED
+    assert state.current_step == FAILED
+    assert state.error == "something went wrong"
+
+
+def test_mark_failed_defaults_and_bounds_empty_messages():
+    state = WorkflowState()
+    state.mark_failed("   ")
+    assert state.error == "The research workflow failed."
+
+    state.mark_failed("x" * 5000)
+    assert len(state.error) <= 1000
+
+
+def test_error_round_trips_through_serialization():
+    state = WorkflowState()
+    state.update_query("topic")
+    state.mark_failed("boom")
+
+    restored = WorkflowState.from_dict(state.to_dict())
+    assert restored.error == "boom"
+    assert restored.status == "Failed"
+
+
+def test_legacy_dict_without_error_loads_with_empty_error():
+    state = WorkflowState.from_dict({"query": "topic", "status": "Research completed"})
+    assert state.error == ""
+
+
+def test_clear_error_removes_the_message():
+    state = WorkflowState()
+    state.mark_failed("boom")
+    state.clear_error()
+    assert state.error == ""

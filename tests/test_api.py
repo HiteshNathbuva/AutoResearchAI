@@ -46,6 +46,8 @@ def test_research_returns_full_payload(client, fake_llm):
     assert body["completed_tasks"] == ["Planner", "Research"]
     assert body["reading_time"] >= 1
     assert body["created_at"] and body["updated_at"]
+    assert body["query"] == "explain vector databases"
+    assert body["error"] == ""
     assert fake_llm.call_count == 2
 
 
