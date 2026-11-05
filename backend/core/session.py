@@ -106,6 +106,15 @@ class SessionManager:
         if cursor.rowcount == 0:
             raise KeyError(session_id)
 
+    def delete_session(self, session_id: str) -> None:
+        """Delete a single research session. Raises ``KeyError`` if missing."""
+
+        with self._lock, self._connection() as connection:
+            cursor = connection.execute("DELETE FROM research_sessions WHERE id = ?",
+                                        (session_id,))
+        if cursor.rowcount == 0:
+            raise KeyError(session_id)
+
     def list_sessions(self, limit: int = 50) -> List[Dict[str, Any]]:
         with self._lock, self._connection() as connection:
             rows = connection.execute("""SELECT id, query, status, confidence, reading_time,

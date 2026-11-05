@@ -1,2 +1,20 @@
-import ResearchInput from "../components/research/ResearchInput"; import WorkflowProgress from "../components/research/WorkflowProgress"; import ResearchResult from "../components/research/ResearchResult";
-export default function Home() { return <div className="space-y-12"><section className="text-center"><p className="mb-3 text-cyan-300">AI-powered research workspace</p><h1 className="text-4xl font-bold sm:text-6xl">Research Faster <span className="text-cyan-400">With Intelligent Agents</span></h1><p className="mx-auto mt-5 max-w-2xl text-slate-400">Plan, research, verify, and save professional reports from one connected workflow.</p></section><ResearchInput /><WorkflowProgress /><ResearchResult /></div>; }
+import ConnectionBanner from "../components/common/ConnectionBanner";
+import ResearchInput from "../components/research/ResearchInput";
+import WorkflowProgress from "../components/research/WorkflowProgress";
+import ResearchResult from "../components/research/ResearchResult";
+
+export default function Home() {
+  return (
+    <div className="space-y-12">
+      <ConnectionBanner />
+      <section className="text-center">
+        <p className="mb-3 text-cyan-300">AI-powered research workspace</p>
+        <h1 className="text-4xl font-bold sm:text-6xl">Research Faster <span className="text-cyan-400">With Intelligent Agents</span></h1>
+        <p className="mx-auto mt-5 max-w-2xl text-slate-400">Plan, research, verify, and save professional reports from one connected workflow.</p>
+      </section>
+      <ResearchInput />
+      <WorkflowProgress />
+      <ResearchResult />
+    </div>
+  );
+}
