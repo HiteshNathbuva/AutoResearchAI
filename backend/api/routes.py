@@ -2,7 +2,7 @@
 
 from typing import Type
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Response
 
 from backend.api.dependencies import SessionManagerDep, WorkflowDep
 from backend.core.logger import get_logger
@@ -49,6 +49,17 @@ def health():
     return {"status": "healthy"}
 
 
+@router.get("/ready")
+def ready(sessions: SessionManager = SessionManagerDep):
+    """Readiness probe: verifies the database is reachable."""
+
+    try:
+        sessions.list_sessions(limit=1)
+    except Exception:  # noqa: BLE001 - never leak internals to clients.
+        raise HTTPException(status_code=503, detail="Service not ready.") from None
+    return {"status": "ready"}
+
+
 @router.post("/research", response_model=ResearchResponse)
 def research(request: ResearchRequest, workflow: WorkflowOrchestrator = WorkflowDep,
              sessions: SessionManager = SessionManagerDep):
@@ -77,6 +88,15 @@ def list_sessions(limit: int = Query(default=50, ge=1, le=100),
 @router.get("/sessions/{session_id}", response_model=SessionResponse)
 def get_session(session_id: str, sessions: SessionManager = SessionManagerDep):
     return _response(session_id, _load_session(sessions, session_id))
+
+
+@router.delete("/sessions/{session_id}", status_code=204)
+def delete_session(session_id: str, sessions: SessionManager = SessionManagerDep):
+    try:
+        sessions.delete_session(session_id)
+    except KeyError as error:
+        raise _not_found(session_id) from error
+    return Response(status_code=204)
 
 
 @router.post("/verify/{session_id}", response_model=VerificationResponse)

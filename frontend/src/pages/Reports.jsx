@@ -1,1 +1,10 @@
-import History from "./History"; export default function Reports(){return <section><p className="text-cyan-300">Saved output</p><History /></section>}
+import History from "./History";
+
+export default function Reports() {
+  return (
+    <section>
+      <p className="text-cyan-300">Saved output</p>
+      <div className="mt-4"><History /></div>
+    </section>
+  );
+}
