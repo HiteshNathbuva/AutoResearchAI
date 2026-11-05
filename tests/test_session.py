@@ -158,3 +158,55 @@ def test_concurrent_writes_are_serialized(session_manager: SessionManager):
 
     assert errors == []
     assert len(session_manager.list_sessions(limit=100)) == 10
+
+
+def test_error_field_persists_and_round_trips(session_manager: SessionManager):
+    state = _state("failing topic")
+    state.mark_failed("the provider rejected the request")
+    session_id = session_manager.create_session(state)
+
+    reloaded = session_manager.get_session(session_id)
+    assert reloaded.status == "Failed"
+    assert reloaded.error == "the provider rejected the request"
+
+
+def test_legacy_database_without_error_column_is_migrated(tmp_path):
+    """A database created before the error column existed must keep working."""
+
+    import sqlite3
+
+    database_path = tmp_path / "legacy.sqlite3"
+    connection = sqlite3.connect(database_path)
+    try:
+        # Reproduce the original (pre-error) schema exactly.
+        connection.execute(
+            """CREATE TABLE research_sessions (
+                id TEXT PRIMARY KEY, query TEXT NOT NULL, plan TEXT NOT NULL DEFAULT '',
+                research TEXT NOT NULL DEFAULT '', verification TEXT NOT NULL DEFAULT '',
+                final_report TEXT NOT NULL DEFAULT '', status TEXT NOT NULL, confidence TEXT,
+                reading_time INTEGER, current_step TEXT NOT NULL,
+                completed_tasks TEXT NOT NULL DEFAULT '[]', created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL, sources TEXT NOT NULL DEFAULT '[]',
+                diagnostics TEXT NOT NULL DEFAULT '{}')"""
+        )
+        connection.execute(
+            "INSERT INTO research_sessions (id, query, status, current_step, "
+            "created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)",
+            ("legacy-1", "old question", "Research completed", "Research",
+             "2020-01-01T00:00:00+00:00", "2020-01-01T00:00:00+00:00"),
+        )
+        connection.commit()
+    finally:
+        connection.close()
+
+    manager = SessionManager(str(database_path))  # runs the migration
+    reloaded = manager.get_session("legacy-1")
+    assert reloaded.query == "old question"
+    assert reloaded.error == ""
+
+    # New writes persist an error without damaging the migrated row.
+    failed = _state("new question")
+    failed.mark_failed("new failure")
+    new_id = manager.create_session(failed)
+    assert manager.get_session(new_id).error == "new failure"
+    assert manager.get_session("legacy-1").query == "old question"

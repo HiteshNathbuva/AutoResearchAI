@@ -20,10 +20,17 @@ CREATE_TABLE_SQL = """CREATE TABLE IF NOT EXISTS research_sessions (
     id TEXT PRIMARY KEY, query TEXT NOT NULL, plan TEXT NOT NULL DEFAULT '',
     research TEXT NOT NULL DEFAULT '', verification TEXT NOT NULL DEFAULT '',
     final_report TEXT NOT NULL DEFAULT '', status TEXT NOT NULL, confidence TEXT,
-    reading_time INTEGER, current_step TEXT NOT NULL,
+    reading_time INTEGER, current_step TEXT NOT NULL, error TEXT NOT NULL DEFAULT '',
     completed_tasks TEXT NOT NULL DEFAULT '[]', created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL, sources TEXT NOT NULL DEFAULT '[]',
     diagnostics TEXT NOT NULL DEFAULT '{}')"""
+
+INSERT_COLUMNS = (
+    "id, query, plan, research, verification, final_report, status, confidence, "
+    "reading_time, current_step, error, completed_tasks, sources, diagnostics, "
+    "created_at, updated_at"
+)
+INSERT_PLACEHOLDERS = ", ".join("?" for _ in range(16))
 
 CREATE_INDEX_SQL = (
     "CREATE INDEX IF NOT EXISTS idx_research_sessions_updated_at "
@@ -82,6 +89,10 @@ class SessionManager:
             connection.execute(
                 "ALTER TABLE research_sessions ADD COLUMN diagnostics TEXT NOT NULL DEFAULT '{}'"
             )
+        if "error" not in existing_columns:
+            connection.execute(
+                "ALTER TABLE research_sessions ADD COLUMN error TEXT NOT NULL DEFAULT ''"
+            )
 
     @staticmethod
     def _state_values(session_id: str, state: WorkflowState):
@@ -89,17 +100,21 @@ class SessionManager:
         return (session_id, data["query"], data["plan"], data["research"],
                 data["verification"], data["final_report"], data["status"],
                 data["confidence"], data["reading_time"], data["current_step"],
+                data.get("error", ""),
                 json.dumps(data["completed_tasks"]),
                 json.dumps(data["sources"]), json.dumps(data["diagnostics"]),
                 data["created_at"], data["updated_at"])
 
     @staticmethod
     def _row_to_state(row: sqlite3.Row) -> WorkflowState:
+        rows = row.keys()
         return WorkflowState.from_dict({
             "query": row["query"], "plan": row["plan"], "research": row["research"],
             "verification": row["verification"], "final_report": row["final_report"],
             "status": row["status"], "confidence": row["confidence"],
             "reading_time": row["reading_time"], "current_step": row["current_step"],
+            # Tolerate rows written before the error column existed.
+            "error": row["error"] if "error" in rows else "",
             "completed_tasks": json.loads(row["completed_tasks"]),
             "sources": json.loads(row["sources"]) if row["sources"] else [],
             "diagnostics": json.loads(row["diagnostics"]) if row["diagnostics"] else {},
@@ -108,11 +123,9 @@ class SessionManager:
     def create_session(self, state: WorkflowState) -> str:
         session_id = str(uuid.uuid4())
         with self._lock, self._connection() as connection:
-            connection.execute("""INSERT INTO research_sessions
-                (id, query, plan, research, verification, final_report, status, confidence,
-                 reading_time, current_step, completed_tasks, sources, diagnostics,
-                 created_at, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            connection.execute(
+                f"INSERT INTO research_sessions ({INSERT_COLUMNS}) "
+                f"VALUES ({INSERT_PLACEHOLDERS})",
                 self._state_values(session_id, state))
         return session_id
 
@@ -129,9 +142,10 @@ class SessionManager:
         with self._lock, self._connection() as connection:
             cursor = connection.execute("""UPDATE research_sessions SET query=?, plan=?, research=?,
                 verification=?, final_report=?, status=?, confidence=?, reading_time=?,
-                current_step=?, completed_tasks=?, sources=?, diagnostics=?, updated_at=?,
-                created_at=? WHERE id=?""",
-                (*values[1:11], values[11], values[12], values[14], values[13], session_id))
+                current_step=?, error=?, completed_tasks=?, sources=?, diagnostics=?,
+                updated_at=?, created_at=? WHERE id=?""",
+                (*values[1:10], values[10], values[11], values[12], values[13],
+                 values[15], values[14], session_id))
         if cursor.rowcount == 0:
             raise KeyError(session_id)
 

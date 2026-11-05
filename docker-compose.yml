@@ -1,0 +1,18 @@
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      # Provide required secrets via a root .env file or the shell environment.
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:?set OPENROUTER_API_KEY in your environment or .env}
+      ENVIRONMENT: production
+      WEB_RESEARCH_ENABLED: ${WEB_RESEARCH_ENABLED:-false}
+      TAVILY_API_KEY: ${TAVILY_API_KEY:-}
+      SEARCH_PROVIDER: ${SEARCH_PROVIDER:-auto}
+    volumes:
+      - research-data:/data
+    restart: unless-stopped
+
+volumes:
+  research-data:

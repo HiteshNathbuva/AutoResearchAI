@@ -27,8 +27,15 @@ class Settings(BaseSettings):
     LOG_LEVEL: str = "INFO"
     DATABASE_PATH: str = str(PROJECT_ROOT / "database" / "autoresearch.sqlite3")
     CORS_ORIGINS: str = "http://localhost:5173,http://127.0.0.1:5173"
+    #: Directory of the built React SPA. When present it is served by the API
+    #: for single-host/container deployments; it is optional in development.
+    FRONTEND_DIST_DIR: str = str(PROJECT_ROOT / "frontend" / "dist")
     LLM_TIMEOUT_SECONDS: float = Field(default=60, gt=0, le=300)
     LLM_MAX_RETRIES: int = Field(default=2, ge=0, le=5)
+    #: Maximum number of research jobs executing concurrently in-process.
+    JOB_MAX_WORKERS: int = Field(default=2, ge=1, le=8)
+    #: Polling hint (seconds) returned to clients; the server itself does not sleep.
+    JOB_POLL_INTERVAL_SECONDS: float = Field(default=1.5, gt=0.2, le=30)
 
     # ------------------------------------------------------------------
     # Phase 2: optional real web research configuration.

@@ -2,319 +2,284 @@
 
 # 🧠 AutoResearchAI
 
-### Production-Grade Multi-Agent AI Research Platform
+### Multi-Agent AI Research Platform
 
-Build intelligent research workflows using multiple AI agents, FastAPI, and OpenRouter.
+Plan, research, verify, and save evidence-backed research reports with a
+multi-agent FastAPI + React workflow.
 
-![Python](https://img.shields.io/badge/Python-3.12-blue?logo=python)
-![FastAPI](https://img.shields.io/badge/FastAPI-Production-green?logo=fastapi)
-![OpenRouter](https://img.shields.io/badge/OpenRouter-LLM-orange)
-![REST API](https://img.shields.io/badge/API-REST-red)
-![Status](https://img.shields.io/badge/Status-Active-success)
+![Python](https://img.shields.io/badge/Python-3.11%2B-blue?logo=python)
+![FastAPI](https://img.shields.io/badge/FastAPI-API-green?logo=fastapi)
+![React](https://img.shields.io/badge/React-19-61dafb?logo=react)
+![Vite](https://img.shields.io/badge/Vite-8-purple?logo=vite)
 ![License](https://img.shields.io/badge/License-MIT-blue)
 
 </div>
 
 ---
 
-# 📖 Overview
+## 📖 Overview
 
-AutoResearchAI is a production-style Multi-Agent AI Research Platform designed to automate the complete research workflow.
+AutoResearchAI turns a single research question into a structured, transparent
+research run. A planner breaks the question down, a research agent gathers
+evidence (optionally from the live web), a verifier checks the claims, and a
+writer produces a readable Markdown report. Every run is persisted, can be
+monitored while it executes, and can be reopened later.
 
-Instead of relying on a single AI response, the system divides research into specialized AI agents that collaborate to produce higher-quality, structured, and verifiable results.
-
-The project follows modern AI engineering practices including modular architecture, workflow orchestration, session management, REST APIs, and scalable backend design.
-
----
-
-# ✨ Features
-
-- 🤖 Multi-Agent AI Architecture
-- 🧠 Planner Agent
-- 🔍 Research Agent
-- ✅ Verifier Agent
-- 📝 Writer Agent
-- 🌐 Real Web Research (search + safe fetching + source tracking)
-- 🛡️ SSRF-protected web fetching
-- 📑 Source tracking & citations
-- ⚡ FastAPI Backend
-- 🌐 REST API
-- 🔄 Session-Based Workflow
-- 📚 Professional Report Generation
-- 📊 AI Fact Check
-- 📄 Markdown Report
-- 📑 PDF/DOCX Export (Coming Soon)
-- 💬 Follow-up Research (Planned)
+Long-running work runs as a **background job**: the API accepts the request
+immediately, checkpoints progress to the database after every step, and the
+frontend polls for live status. Failures are persisted with a safe message
+instead of disappearing.
 
 ---
 
-# 🏗 Architecture
+## ✨ Features
+
+- 🤖 Four specialized agents: Planner, Research, Verifier, Writer
+- ⏳ Background jobs with live progress polling, duplicate-job protection and persisted failures
+- 🌐 Optional real web research (Tavily search + SSRF-safe fetching + extraction)
+- 🛡️ SSRF protection: every URL and redirect is validated before connecting
+- 📑 Deterministic source tracking with clickable, sanitized citations
+- 📄 Sanitized Markdown report rendering (raw HTML/`javascript:` are stripped)
+- 💾 SQLite persistence — sessions, reports and progress survive restarts
+- ⚡ FastAPI REST API with typed schemas, liveness and readiness probes
+- 🧰 OpenRouter (OpenAI-compatible) LLM client with bounded, classified retries
+- 🧪 Offline test suite (mocked LLM and retrieval), ruff + ESLint, CI workflow
+
+---
+
+## 🏗 Architecture
 
 ```text
-                    User
-                      │
-                      ▼
-              FastAPI REST API
-                      │
-                      ▼
-          Workflow Orchestrator
-                      │
-      ┌───────────────┼───────────────┐
-      ▼               ▼               ▼
- Planner Agent   Research Agent   Session Manager
-                      │
-                      ▼
-              Verification Agent
-                      │
-                      ▼
-                Writer Agent
-                      │
-                      ▼
-              Professional Report
+React SPA (Vite) ──relative /api──▶ FastAPI
+                                      │
+                          sync routes │ background job routes (202 + poll)
+                                      ▼
+                               JobRunner (bounded thread pool)
+                                      │
+                            WorkflowOrchestrator
+                 Planner → Research → Verifier → Writer
+                                      │
+                 LLMClient (OpenRouter)   WebResearchService (optional)
+                                      │
+                                 SQLite (WAL)
 ```
 
----
-
-# ⚙ Current Workflow
-
-```text
-User Query
-      │
-      ▼
-Planner Agent (Hidden)
-      │
-      ▼
-Research Agent
-      │
-      ▼
-Research Results
-      │
-      ├──────────────► AI Fact Check
-      │                    │
-      │                    ▼
-      │             Verifier Agent
-      │                    │
-      │                    ▼
-      │             Verified Report
-      │
-      └──────────────► Generate Report
-                           │
-                           ▼
-                      Writer Agent
-                           │
-                           ▼
-                  Professional Report
-```
+See [`docs/architecture.md`](docs/architecture.md) and
+[`docs/workflow.md`](docs/workflow.md) for details.
 
 ---
 
-# 🛠 Tech Stack
+## 🧰 Tech stack
 
-| Category | Technologies |
-|----------|--------------|
-| Language | Python |
-| Backend | FastAPI |
-| AI Provider | OpenRouter |
-| AI Model | OpenRouter Auto |
-| API Style | REST API |
-| Configuration | Pydantic Settings |
-| Validation | Pydantic |
-| Server | Uvicorn |
-| Version Control | Git + GitHub |
-
----
-
-# 📂 Project Structure
-
-```text
-AutoResearchAI/
-
-backend/
-│
-├── agents/
-├── api/
-├── core/
-├── prompts/
-├── schemas/
-├── utils/
-│
-├── main.py
-│
-tests/
-│
-requirements.txt
-README.md
-```
+| Layer | Technology |
+|-------|------------|
+| Backend | Python 3.11+, FastAPI, Uvicorn |
+| LLM | OpenRouter via the OpenAI-compatible SDK |
+| Persistence | SQLite (standard library, WAL mode) |
+| Web research | Tavily Search API + `httpx`, standard-library extraction |
+| Validation/settings | Pydantic, pydantic-settings |
+| Frontend | React 19, Vite, Tailwind CSS, React Router |
+| Markdown | react-markdown + remark-gfm + rehype-sanitize |
+| Tests/QA | pytest, ruff, ESLint |
 
 ---
 
-# 🚀 API Endpoints
+## 🚀 Getting started
 
-| Method | Endpoint | Description |
-|---------|----------|-------------|
-| GET | / | Health Check |
-| POST | /research | Generate Research |
-| POST | /verify/{session_id} | AI Fact Check |
-| POST | /report/{session_id} | Generate Professional Report |
+### 1. Clone and enter the repository
 
----
+**Windows PowerShell**
 
-# 🚀 Getting Started
-
-## Clone Repository
-
-```bash
-git clone https://github.com/hiteshnathbuva/AutoResearchAI.git
-
+```powershell
+git clone https://github.com/HiteshNathbuva/AutoResearchAI.git
 cd AutoResearchAI
 ```
 
-## Create Virtual Environment
+**macOS / Linux**
+
+```bash
+git clone https://github.com/HiteshNathbuva/AutoResearchAI.git
+cd AutoResearchAI
+```
+
+### 2. Backend environment
+
+**Windows PowerShell**
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+pip install -r requirements.txt -r requirements-dev.txt
+copy .env.example .env
+```
+
+**macOS / Linux**
 
 ```bash
 python -m venv .venv
-```
-
-Activate environment
-
-Windows
-
-```bash
-.venv\Scripts\activate
-```
-
-Linux / macOS
-
-```bash
 source .venv/bin/activate
+python -m pip install --upgrade pip
+pip install -r requirements.txt -r requirements-dev.txt
+cp .env.example .env
 ```
 
----
+### 3. Configure environment
 
-## Install Dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
----
-
-## Configure Environment
-
-Create a `.env` file in the project root.
+Open `.env` and set at least the required key:
 
 ```env
-OPENROUTER_API_KEY=your_api_key_here
+OPENROUTER_API_KEY=your_openrouter_key_here
 ```
 
-### Optional: Real Web Research (Phase 2)
+**Required**
 
-Web research is off by default. To enable it, set the following (all optional —
-the app boots fine without them, and gracefully falls back to LLM-only research
-if web tools are disabled or fail):
+| Variable | Purpose |
+|----------|---------|
+| `OPENROUTER_API_KEY` | OpenRouter API key. The app cannot complete real LLM calls without it. |
 
-```env
-# Enable real web research (default: false)
-WEB_RESEARCH_ENABLED=true
+**Optional — model and runtime**
 
-# Search provider: auto | tavily | none (default: auto)
-SEARCH_PROVIDER=auto
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `MODEL_NAME` | `deepseek/deepseek-chat-v3-0324:free` | OpenRouter model identifier |
+| `TEMPERATURE`, `MAX_TOKENS` | `0.7`, `4096` | Sampling controls |
+| `LLM_TIMEOUT_SECONDS`, `LLM_MAX_RETRIES` | `60`, `2` | Provider timeout and transient retries |
+| `JOB_MAX_WORKERS` | `2` | Concurrent background research jobs |
+| `JOB_POLL_INTERVAL_SECONDS` | `1.5` | Polling hint returned to clients |
+| `DATABASE_PATH` | `database/autoresearch.sqlite3` | SQLite file location |
+| `CORS_ORIGINS` | localhost Vite origins | Comma-separated allowed origins |
 
-# Optional Tavily API key. Never commit a real key. When absent and search is
-# enabled, the system degrades gracefully to LLM-only research.
-TAVILY_API_KEY=your_tavily_key_here
+**Optional — real web research** (disabled unless `WEB_RESEARCH_ENABLED=true`)
 
-# Bounded resource limits (safe defaults shown)
-SEARCH_MAX_RESULTS=5
-SEARCH_TIMEOUT_SECONDS=10
-SEARCH_MAX_RETRIES=2
-MAX_FETCHED_SOURCES=5
-FETCH_TIMEOUT_SECONDS=10
-FETCH_MAX_REDIRECTS=3
-FETCH_MAX_BYTES=2000000
-EXTRACT_MAX_CHARS=8000
-```
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `WEB_RESEARCH_ENABLED` | `false` | Turn on the bounded web research pass |
+| `SEARCH_PROVIDER` | `auto` | `auto`, `tavily`, or `none` |
+| `TAVILY_API_KEY` | _empty_ | Tavily key. Without it the app degrades to model-only research |
+| `SEARCH_MAX_RESULTS`, `MAX_FETCHED_SOURCES` | `5`, `5` | Bounds on results and fetched pages |
+| `FETCH_TIMEOUT_SECONDS`, `FETCH_MAX_REDIRECTS`, `FETCH_MAX_BYTES` | `10`, `3`, `2000000` | Fetch limits |
+| `EXTRACT_MAX_CHARS` | `8000` | Extracted text cap per source |
 
-**Security restrictions:** fetched URLs and every redirect are validated
-against an SSRF blocklist *before* any connection. Only HTTP/HTTPS is allowed;
-localhost, loopback, private/link-local/reserved networks, CGNAT, cloud-metadata
-addresses, and common encoded-IP bypasses are rejected. Response size, redirect
-count, and extracted text are all bounded, and fetched page content is treated as
-untrusted data (never as instructions) in every prompt.
+When web research is disabled, misconfigured, or fails, the application never
+crashes and never fabricates sources: it records the situation in `diagnostics`
+and falls back to model-only research, and the UI shows an honest provenance
+notice.
 
----
-
-## Run Backend
+### 4. Run the backend
 
 ```bash
 python -m uvicorn backend.main:app --reload
 ```
 
-Open
+- API docs (Swagger): <http://127.0.0.1:8000/docs>
+- Health: <http://127.0.0.1:8000/api/health>
 
+### 5. Run the frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
 ```
-http://127.0.0.1:8000/docs
+
+Open <http://localhost:5173>. The Vite dev server proxies `/api` to the backend,
+so no CORS configuration is needed for local development. For a remote backend,
+set `VITE_API_URL` in `frontend/.env` (see `frontend/.env.example`).
+
+---
+
+## 🔌 API reference
+
+All routes are prefixed with `/api`.
+
+### Background jobs (used by the frontend)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/jobs/research` | Start a research job. Returns `202` with `session_id`, `poll_url`, `poll_interval_seconds`. |
+| `POST` | `/api/jobs/verify/{session_id}` | Start verification + report writing on a session (`202`). |
+| `POST` | `/api/jobs/report/{session_id}` | Start report generation on a session (`202`). |
+| `GET` | `/api/jobs/{session_id}` | Poll a job: full session payload plus `job_active`. |
+| `GET` | `/api/sessions` | List session summaries (`?limit=1..100`). |
+| `GET` | `/api/sessions/{session_id}` | Retrieve a full persisted session. |
+| `GET` | `/api/health` | Static liveness probe. |
+| `GET` | `/api/ready` | Readiness probe including a database check. |
+
+Poll `GET /api/jobs/{id}` until `status` is one of `Research completed`,
+`Verified report generated`, `Report generated`, or `Failed`. Starting another
+job on a session that is already running returns `409`.
+
+### Synchronous endpoints (retained for compatibility)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/research` | Run Planner + Research inline and persist the session. |
+| `POST` | `/api/verify/{session_id}` | Run Verifier + Writer inline. |
+| `POST` | `/api/report/{session_id}` | Run the Writer inline. |
+
+Validation errors return `422`, unknown sessions `404`, and upstream LLM
+failures on synchronous routes `502` with a generic, secret-free message.
+
+---
+
+## ✅ Testing and quality checks
+
+```bash
+# Backend: fully offline (a dummy key and fake LLM are wired in conftest)
+pytest
+ruff check .
+
+# Frontend
+cd frontend
+npm run lint
+npm run build
 ```
 
 ---
 
-# 🗺 Roadmap
+## 🚢 Deployment notes
 
-## ✅ Completed
-
-- Multi-Agent Architecture
-- Workflow Engine
-- Planner Agent
-- Research Agent
-- Verifier Agent
-- Writer Agent
-- FastAPI Backend
-- REST API
-- Session Management
-- Swagger Documentation
-
-## 🚧 In Progress
-
-- Repository Improvements
-- React Frontend
-- Professional Dashboard
-
-## 🔮 Planned
-
-- PDF Export
-- DOCX Export
-- Follow-up Research
-- Visual Reports
-- Internet Search Integration
-- RAG Knowledge Base
-- Authentication
-- Conversation History
-- Docker Deployment
+- The backend is a **long-running stateful process** (in-process job pool +
+  SQLite). Run it on a host that supports persistent processes — a container,
+  VM, or platform such as Render/Railway/Fly.io. A conventional Vercel static
+  deployment cannot run this FastAPI server or its background worker without
+  being re-architected into serverless functions and an external database.
+- The frontend is a static Vite build (`frontend/dist`) that can be hosted on
+  any static host. Point it at the API with `VITE_API_URL` at build time, or
+  serve both behind one origin and use relative `/api` paths.
+- Provide secrets through environment variables; never commit a real `.env`.
+- With one SQLite file and an in-process worker, run a **single backend
+  instance**. Scaling horizontally requires an external queue and a
+  client/server database (see [`docs/roadmap.md`](docs/roadmap.md)).
 
 ---
 
-# 🤝 Contributing
+## 🔒 Security
 
-Contributions, issues, and feature requests are welcome.
-
-Feel free to fork the project and submit pull requests.
-
----
-
-# 📄 License
-
-This project is licensed under the MIT License.
-
----
-
-# 👨‍💻 Author
-
-**Hitesh Nathbuva**
-
-GitHub
-
-https://github.com/hiteshnathbuva
+- Secrets are loaded from environment variables and are never logged or sent to
+  the browser.
+- Every fetched URL and redirect is validated against an SSRF blocklist before
+  any connection; content types, response sizes and redirects are bounded.
+- Retrieved web content is treated as untrusted data and delimited in prompts.
+- Report Markdown is sanitized before rendering; external links open safely.
+- The system has no authentication yet — do not expose it publicly without
+  adding auth and rate limiting.
 
 ---
 
-⭐ If you found this project useful, consider giving it a star.
+## ⚠️ Known limitations
+
+- No built-in authentication, multi-tenancy or rate limiting.
+- Single-process only (SQLite + in-process job runner).
+- The confidence label is parsed from model prose; structured outputs are on the
+  roadmap.
+- Without `OPENROUTER_API_KEY` (and optionally `TAVILY_API_KEY`) the workflow
+  cannot produce live results; tests and startup still work offline.
+- PDF/DOCX export and follow-up research are not yet implemented.
+
+---
+
+## 📄 License
+
+MIT © [Hitesh Nathbuva](https://github.com/HiteshNathbuva)

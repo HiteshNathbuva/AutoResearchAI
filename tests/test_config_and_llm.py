@@ -164,6 +164,70 @@ def test_switch_model():
 
 
 # ----------------------------------------------------------------------
+# Retry classification
+# ----------------------------------------------------------------------
+
+from openai import AuthenticationError, BadRequestError, RateLimitError  # noqa: E402
+
+
+class _FakeAuthError(AuthenticationError):  # bypass SDK constructor requirements
+    def __init__(self):
+        Exception.__init__(self, "invalid api key")
+
+
+class _FakeBadRequest(BadRequestError):
+    def __init__(self):
+        Exception.__init__(self, "context length exceeded")
+
+
+class _FakeRateLimit(RateLimitError):
+    def __init__(self):
+        Exception.__init__(self, "rate limited")
+
+
+def test_authentication_error_is_not_retried(monkeypatch):
+    monkeypatch.setattr("backend.core.llm.time.sleep",
+                        lambda *_: pytest.fail("non-retryable errors must not backoff"))
+    stub = StubOpenAI([_FakeAuthError()])
+    client = LLMClient(settings=_settings(LLM_MAX_RETRIES=3), client=stub)
+
+    with pytest.raises(LLMError):
+        client.chat([{"role": "user", "content": "hi"}])
+    assert len(stub.calls) == 1
+
+
+def test_bad_request_error_is_not_retried(monkeypatch):
+    monkeypatch.setattr("backend.core.llm.time.sleep",
+                        lambda *_: pytest.fail("non-retryable errors must not backoff"))
+    stub = StubOpenAI([_FakeBadRequest()])
+    client = LLMClient(settings=_settings(LLM_MAX_RETRIES=3), client=stub)
+
+    with pytest.raises(LLMError):
+        client.chat([{"role": "user", "content": "hi"}])
+    assert len(stub.calls) == 1
+
+
+def test_rate_limit_error_is_retried(monkeypatch):
+    monkeypatch.setattr("backend.core.llm.time.sleep", lambda *_: None)
+    stub = StubOpenAI([_FakeRateLimit(), _FakeRateLimit(), _FakeRateLimit()])
+    client = LLMClient(settings=_settings(LLM_MAX_RETRIES=2), client=stub)
+
+    with pytest.raises(LLMError):
+        client.chat([{"role": "user", "content": "hi"}])
+    assert len(stub.calls) == 3
+
+
+def test_error_message_preserves_safe_detail(monkeypatch):
+    monkeypatch.setattr("backend.core.llm.time.sleep", lambda *_: None)
+    stub = StubOpenAI([_FakeAuthError()])
+    client = LLMClient(settings=_settings(LLM_MAX_RETRIES=0), client=stub)
+
+    with pytest.raises(LLMError) as exc_info:
+        client.chat([{"role": "user", "content": "hi"}])
+    assert "invalid api key" in str(exc_info.value)
+
+
+# ----------------------------------------------------------------------
 # Composition root
 # ----------------------------------------------------------------------
 

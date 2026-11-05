@@ -1,0 +1,35 @@
+# Version control and CI
+.git
+.github
+
+# Python
+.venv
+__pycache__
+*.pyc
+.pytest_cache
+.ruff_cache
+.coverage
+htmlcov
+
+# Node / frontend build artifacts (rebuilt inside the image)
+frontend/node_modules
+frontend/dist
+node_modules
+dist
+build
+
+# Environment and local data — never bake secrets or user data into an image
+.env
+*.env
+database/*.sqlite3
+database/*.sqlite3-*
+*.db
+
+# Editor / OS
+.vscode
+.idea
+.DS_Store
+
+# Documentation not needed at runtime (prompts/*.md ARE required and kept)
+docs
+AUTORESEARCHAI_ENGINEERING_ASSESSMENT.md

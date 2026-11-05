@@ -8,6 +8,7 @@ them to route handlers via ``Depends`` so tests can override them.
 from fastapi import Depends, Request
 
 from backend.core.config import Settings, get_settings
+from backend.core.jobs import JobRunner
 from backend.core.llm import LLMClient
 from backend.core.session import SessionManager
 from backend.core.workflow import WorkflowOrchestrator
@@ -37,7 +38,14 @@ def get_workflow(request: Request) -> WorkflowOrchestrator:
     return request.app.state.workflow
 
 
+def get_job_runner(request: Request) -> JobRunner:
+    """Return the shared background job runner created at startup."""
+
+    return request.app.state.job_runner
+
+
 SettingsDep = Depends(get_settings_dependency)
 LLMClientDep = Depends(get_llm_client)
 SessionManagerDep = Depends(get_session_manager)
 WorkflowDep = Depends(get_workflow)
+JobRunnerDep = Depends(get_job_runner)

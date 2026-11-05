@@ -13,6 +13,7 @@ from backend.agents.research_agent import ResearchAgent
 from backend.agents.verifier_agent import VerifierAgent
 from backend.agents.writer_agent import WriterAgent
 from backend.core.config import Settings, get_settings
+from backend.core.jobs import JobRunner
 from backend.core.llm import LLMClient
 from backend.core.session import SessionManager
 from backend.core.workflow import WorkflowOrchestrator
@@ -27,6 +28,7 @@ class Resources:
     llm_client: Any
     session_manager: SessionManager
     workflow: WorkflowOrchestrator
+    job_runner: JobRunner
 
 
 def build_workflow(llm_client: Any, web_research: Optional[WebResearchService] = None) -> WorkflowOrchestrator:
@@ -54,7 +56,10 @@ def build_resources(settings: Optional[Settings] = None, llm_client: Optional[An
     llm_client = llm_client if llm_client is not None else LLMClient(settings=settings)
     session_manager = session_manager or SessionManager(settings.DATABASE_PATH)
     web_research = web_research if web_research is not None else build_web_research(settings)
+    workflow = build_workflow(llm_client, web_research=web_research)
+    job_runner = JobRunner(workflow, session_manager,
+                           max_workers=settings.JOB_MAX_WORKERS)
 
     return Resources(settings=settings, llm_client=llm_client,
                      session_manager=session_manager,
-                     workflow=build_workflow(llm_client, web_research=web_research))
+                     workflow=workflow, job_runner=job_runner)
